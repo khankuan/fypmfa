@@ -1,0 +1,62 @@
+
+<!-- Refresh -->
+<div>
+  <button type="button" class="btn btn-info" ng-click="init();">    
+    <span class="glyphicon glyphicon-refresh"></span> Refresh
+  </button>
+</div>
+
+<!-- Local device info -->
+<h4>Local Device</h4>
+<div class="well well-sm">
+  <p><strong>Device Address:</strong> {{localDevice.address}}</p>
+  <p><strong>Device Name:</strong> {{localDevice.name}}</p>
+  <p><strong>Available:</strong> 
+    <span ng-show="localDevice.available">Yes</span>
+    <span ng-show="!localDevice.available">No</span>
+  </p>
+  <p><strong>Powered:</strong>
+    <span ng-show="localDevice.powered">Yes</span>
+    <span ng-show="!localDevice.powered">No</span>
+  </p>
+  <p><strong>Discovering:</strong>
+    <span ng-show="localDevice.discovering">Yes</span>
+    <span ng-show="!localDevice.discovering">No</span>
+  </p>
+</div>
+
+<!-- Devices info -->
+<h4>Devices</h4>
+<div class="well well-sm">
+  <table class="table" style="margin-bottom:0">
+
+    <thead>
+      <tr>
+        <th style="width: 35%">Name</th>
+        <th style="width: 35%">Device Address</th>
+        <th style="width: 15%"></th>
+        <th style="width: 15%"></th>
+      </tr>
+    </thead>
+
+    <tr ng-repeat="d in devices" ng-show="addedDevicesAddresses[d.address] != undefined">
+      <td>{{d.name}}</td>
+      <td>{{d.address}}</td>
+      <td>
+        <button type="button" class="btn btn-danger" ng-click="removeDeviceAddress(d.address)" style="width:6em">Remove</button>
+      </td>
+      <td>
+        <a href="" ng-click="goToDeviceAdmin(d.address)" style="width:6em">Configure</a>
+      </td>
+    </tr>
+
+    <tr ng-repeat="d in devices" ng-show="addedDevicesAddresses[d.address] == undefined">
+      <td>{{d.name}}</td>
+      <td>{{d.address}}</td>
+      <td>
+        <button type="button" class="btn btn-primary" ng-click="addDeviceAddress(d.address)" style="width:6em">Add</button>
+      </td>
+      <td></td>
+    </tr>
+  </table>
+</div>

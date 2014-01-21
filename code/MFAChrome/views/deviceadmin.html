@@ -1,0 +1,76 @@
+<!-- Back -->
+<div>
+  <button type="button" class="btn btn-info" ng-click="backToDevices()">
+  	<span class="glyphicon glyphicon-circle-arrow-left"></span> Back to devices 
+  </button>
+</div>
+
+<!-- Connecting -->
+<div ng-show="status == 'connecting'" class="center">
+	<strong>Connecting to device:</strong> {{address}}
+</div>
+
+
+<!-- Connection failed -->
+<div ng-show="status == 'failed'" class="center">
+	<strong>Failed to connect to device:</strong> {{address}}
+</div>
+
+
+<!-- Device info -->
+<div ng-show="status == 'connected'">
+	<h4>Device Info</h4>
+	<div class="well well-sm">
+		<p><strong>Name:</strong> {{info.name}}</p>
+		<p><strong>Uuid:</strong> {{info.uuid}}</p>
+		<p><strong>Seed:</strong> {{info.seed}}</p>
+		<p><strong>Hashed Pin:</strong> {{info.hashedPin}}</p>
+		<p><strong>Hashed Password:</strong> {{info.hashedPassword}}</p>
+	</div>
+</div>
+
+
+<!-- Update name -->
+<div ng-show="status == 'connected'">
+	<h4>Update Device</h4>
+	<div class="well" class="input-group">
+		<input class="form-control" ng-model="newName" type="text" placeholder="New Name (Optional)"></input>
+		<input class="form-control" ng-model="newPin" type="text" placeholder="New PIN (Optional)"></input>
+		<input class="form-control" ng-model="newPassword" type="text" placeholder="New Password (Optional)"></input>
+		<input class="form-control" ng-model="password" type="text" placeholder="Password (Required)"></input>
+		<button type="button" class="btn btn-primary" ng-click="updateInfo(password, newName, newPin, newPassword); newName=''; newPin = ''; newPassword = ''; password=''">Update</button>
+	</div>
+</div>
+
+
+<!-- Reset device -->
+<div ng-show="status == 'connected'">
+	<h4>Reset Device</h4>
+	<div class="well" class="input-group">
+		<button type="button" class="btn btn-danger" ng-click="resetDevice()">Reset</button>
+	</div>
+</div>
+
+
+<!-- Retrieve Seed Domain -->
+<div ng-show="status == 'connected'">
+	<h4>Retrieve Seed Domain</h4>
+	<div class="well" class="input-group">
+		<input class="form-control" ng-model="seedDomainDomain" type="text" placeholder="Domain (Required)"></input>
+		<input class="form-control" ng-model="seedDomainPin" type="text" placeholder="PIN (Required)"></input>
+		<button type="button" class="btn btn-primary" ng-click="getSeedDomain(seedDomainPin, seedDomainDomain);">Submit</button>
+		<p ng-show="requestedSeedDomain.length > 0"><br><strong>SeedDomain retrieved:</strong> {{requestedSeedDomain}}</p>
+	</div>
+</div>
+
+
+<!-- Retrieve OTP -->
+<div ng-show="status == 'connected'">
+	<h4>Retrieve OTP</h4>
+	<div class="well" class="input-group">
+		<input class="form-control" ng-model="otpDomain" type="text" placeholder="Domain (Required)"></input>
+		<input class="form-control" ng-model="otpPin" type="text" placeholder="PIN (Required)"></input>
+		<button type="button" class="btn btn-primary" ng-click="getOTP(otpPin, otpDomain);">Submit</button>
+		<p ng-show="requestedOTP.length > 0"><br><strong>OTP retrieved:</strong> {{requestedOTP}}</p>
+	</div>
+</div>
