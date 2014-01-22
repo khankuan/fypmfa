@@ -1,10 +1,8 @@
-package com.androidmfa.app;
+package com.mfaandroid.app;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
-import android.content.Context;
-import android.os.Handler;
 import android.util.Log;
 
 import java.io.IOException;
@@ -25,7 +23,9 @@ public class BluetoothAcceptThread extends Thread {
         try {
             mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             tmp = mBluetoothAdapter.listenUsingInsecureRfcommWithServiceRecord(name, uuid);
-        } catch (IOException e) { }
+        } catch (Exception e) {
+            Log.d("BluetoothAcceptThread", "Bluetooth failed");
+        }
         mmServerSocket = tmp;
     }
 

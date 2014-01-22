@@ -1,19 +1,22 @@
-package com.androidmfa.app;
+package com.mfaandroid.app;
 
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Fragment;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 
 public class MainActivity extends Activity {
+
+    private int REQUEST_ENABLE_BT = 9876;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,11 +56,31 @@ public class MainActivity extends Activity {
         ToggleButton b = (ToggleButton) v;
         Intent intent = new Intent(this, MFAService.class);
 
-        if (b.isChecked())
-            startService(intent);
-        else
+        if (b.isChecked()){
+            BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            if (mBluetoothAdapter != null) {
+                if (!mBluetoothAdapter.isEnabled()) {
+                    Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                    startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+                } else
+                    startService(intent);
+            } else
+                Toast.makeText(this, "Device does not support Bluetooth", Toast.LENGTH_SHORT).show();
+        } else
             stopService(intent);
-        Log.d("MainActivity", isMyServiceRunning()+"");
+    }
+
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_ENABLE_BT) {
+            if(resultCode == RESULT_OK){
+                Intent intent = new Intent(this, MFAService.class);
+                startService(intent);
+            }
+            if (resultCode == RESULT_CANCELED) {
+                Toast.makeText(this, "Error requesting Bluetooth to start", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
 

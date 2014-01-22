@@ -1,10 +1,8 @@
-package com.androidmfa.app;
+package com.mfaandroid.app;
 
 import android.app.Service;
 import android.content.Intent;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -22,9 +20,11 @@ public class MFAService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        mfaDevice = new MFADevice(this.getApplicationContext());
+        if (mfaDevice.getUuid().length() == 0)
+            mfaDevice.resetDevice();
         bluetoothAcceptThread = new BluetoothAcceptThread("MFA", sppUuid, MFAService.this);
         bluetoothAcceptThread.start();
-        mfaDevice = new MFADevice(this.getApplicationContext());
         return START_STICKY;
     }
 
@@ -84,18 +84,18 @@ public class MFAService extends Service {
                     response.put("success", false);
 
 
-            } else if (queryType.equals("getSeedDomain_E_Pin")){
+            } else if (queryType.equals("getDomainSeed_E_Pin")){
                 String domain = m.getString("domain");
                 String pinNonce = m.getString("pinNonce");
-                response.put("seedDomain_E_Pin", mfaDevice.getSeedDomain_E_Pin(domain, pinNonce));
-                response.put("seedDomainAnswer", mfaDevice.getSeedDomain(domain));
+                response.put("domainSeed_E_Pin", mfaDevice.getDomainSeed_E_Pin(domain, pinNonce));
+                response.put("domainSeedAnswer", mfaDevice.getDomainSeed(domain));
 
 
-            } else if (queryType.equals("getOTP_E_Pin")){
+            } else if (queryType.equals("getDomainOTP_E_Pin")){
                 String domain = m.getString("domain");
                 String pinNonce = m.getString("pinNonce");
-                response.put("otp_E_Pin", mfaDevice.getOTP_E_Pin(domain, pinNonce));
-                response.put("otpAnswer", mfaDevice.getOTP(domain));
+                response.put("domainOTP_E_Pin", mfaDevice.getDomainOTP_E_Pin(domain, pinNonce));
+                response.put("domainOTPAnswer", mfaDevice.getDomainOTP(domain));
 
 
             } else if (queryType.equals("resetDevice")){

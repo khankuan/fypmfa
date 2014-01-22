@@ -52,25 +52,25 @@
 </div>
 
 
-<!-- Retrieve Seed Domain -->
+<!-- Retrieve Domain Seed -->
 <div ng-show="status == 'connected'">
-	<h4>Retrieve Seed Domain</h4>
+	<h4>Retrieve Domain Seed</h4>
 	<div class="well" class="input-group">
-		<input class="form-control" ng-model="seedDomainDomain" type="text" placeholder="Domain (Required)"></input>
-		<input class="form-control" ng-model="seedDomainPin" type="text" placeholder="PIN (Required)"></input>
-		<button type="button" class="btn btn-primary" ng-click="getSeedDomain(seedDomainPin, seedDomainDomain);">Submit</button>
-		<p ng-show="requestedSeedDomain.length > 0"><br><strong>SeedDomain retrieved:</strong> {{requestedSeedDomain}}</p>
+		<input class="form-control" ng-model="domainSeedDomain" type="text" placeholder="Domain (Required)"></input>
+		<input class="form-control" ng-model="domainSeedPin" type="text" placeholder="PIN (Required)"></input>
+		<button type="button" class="btn btn-primary" ng-click="getDomainSeed(domainSeedPin, domainSeedDomain);">Submit</button>
+		<p ng-show="requestedDomainSeed.length > 0"><br><strong>Domain Seed retrieved:</strong> {{requestedDomainSeed}}</p>
 	</div>
 </div>
 
 
-<!-- Retrieve OTP -->
+<!-- Retrieve Domain OTP -->
 <div ng-show="status == 'connected'">
-	<h4>Retrieve OTP</h4>
+	<h4>Retrieve Domain OTP</h4>
 	<div class="well" class="input-group">
-		<input class="form-control" ng-model="otpDomain" type="text" placeholder="Domain (Required)"></input>
-		<input class="form-control" ng-model="otpPin" type="text" placeholder="PIN (Required)"></input>
-		<button type="button" class="btn btn-primary" ng-click="getOTP(otpPin, otpDomain);">Submit</button>
-		<p ng-show="requestedOTP.length > 0"><br><strong>OTP retrieved:</strong> {{requestedOTP}}</p>
+		<input class="form-control" ng-model="domainOTPDomain" type="text" placeholder="Domain (Required)"></input>
+		<input class="form-control" ng-model="domainOTPPin" type="text" placeholder="PIN (Required)"></input>
+		<button type="button" class="btn btn-primary" ng-click="getDomainOTP(domainOTPPin, domainOTPDomain);">Submit</button>
+		<p ng-show="requestedDomainOTP.length > 0"><br><strong>Domain OTP retrieved:</strong> {{requestedDomainOTP}}</p>
 	</div>
 </div>

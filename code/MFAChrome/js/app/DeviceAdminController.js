@@ -63,18 +63,18 @@ app.controller('DeviceAdminController', ['$scope', '$routeParams', '$location', 
 			});
 		}
 
-		$scope.getSeedDomain = function(pin, domain){
+		$scope.getDomainSeed = function(pin, domain){
 			var pinNonce = new Date().getTime();
-			$scope.mfaDevice.getSeedDomain(domain, pinNonce, pin, function(response){
-				$scope.requestedSeedDomain = response.seedDomain;
+			$scope.mfaDevice.getDomainSeed(domain, pinNonce, pin, function(response){
+				$scope.requestedDomainSeed = response.domainSeed;
 				$scope.safeApply();
 			});
 		}
 
-		$scope.getOTP = function(pin, domain){
+		$scope.getDomainOTP = function(pin, domain){
 			var pinNonce = new Date().getTime();
-			$scope.mfaDevice.getOTP(domain, pinNonce, pin, function(response){
-				$scope.requestedOTP = response.otp;
+			$scope.mfaDevice.getDomainOTP(domain, pinNonce, pin, function(response){
+				$scope.requestedDomainOTP = response.domainOTP;
 				$scope.safeApply();
 			});
 		}

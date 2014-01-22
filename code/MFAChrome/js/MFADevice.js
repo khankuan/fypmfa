@@ -50,32 +50,33 @@ var MFADevice = function(device){
     query(q, callback);
   }
    
-  this.getSeedDomain_E_Pin = function(domain, pinNonce, callback){
-    var q = {queryType: "getSeedDomain_E_Pin"};
+  this.getDomainSeed_E_Pin = function(domain, pinNonce, callback){
+    var q = {queryType: "getDomainSeed_E_Pin"};
     q.domain = domain;
     q.pinNonce = pinNonce;
     query(q, callback);
   }
 
-  this.getSeedDomain = function(domain, pinNonce, pin, callback){
-    this.getSeedDomain_E_Pin(domain, pinNonce, function(response){
-      if (response.seedDomain_E_Pin != undefined)
-        response.seedDomain = xor(response.seedDomain_E_Pin, hash(hash(pin) + pinNonce));
+  this.getDomainSeed = function(domain, pinNonce, pin, callback){
+    this.getDomainSeed_E_Pin(domain, pinNonce, function(response){
+      console.log(hash(hash(pin) + pinNonce));
+      if (response.domainSeed_E_Pin != undefined)
+        response.domainSeed = xorBase64(response.domainSeed_E_Pin, hash(hash(pin) + pinNonce));
       callback(response);
     })
   }
 
-  this.getOTP_E_Pin = function(domain, pinNonce, callback){
-    var q = {queryType: "getOTP_E_Pin"};
+  this.getDomainOTP_E_Pin = function(domain, pinNonce, callback){
+    var q = {queryType: "getDomainOTP_E_Pin"};
     q.domain = domain;
     q.pinNonce = pinNonce;
     query(q, callback);
   }
 
-  this.getOTP = function(domain, pinNonce, pin, callback){
-    this.getOTP_E_Pin(domain, pinNonce, function(response){
-      if (response.otp_E_Pin != undefined)
-        response.otp = xor(response.otp_E_Pin, hash(hash(pin) + pinNonce));
+  this.getDomainOTP = function(domain, pinNonce, pin, callback){
+    this.getDomainOTP_E_Pin(domain, pinNonce, function(response){
+      if (response.domainOTP_E_Pin != undefined)
+        response.domainOTP = xorBase64(response.domainOTP_E_Pin, hash(hash(pin) + pinNonce));
       callback(response);
     })
   }
@@ -239,13 +240,15 @@ var MFADevice = function(device){
   }
 
   function hash(msg){
-    return CryptoJS.SHA1(msg).toString(CryptoJS.enc.hex);
+    return CryptoJS.SHA1(msg).toString(CryptoJS.enc.Base64);
   }
 
-  function xor(msg, key){
+  function xorBase64(msg, key){
+    msg = atob(msg);
+    key = atob(key);
     var output = "";
     for (var i = 0; i < msg.length; i++)
         output += String.fromCharCode(msg.charCodeAt(i) ^ key.charCodeAt(i % key.length));
-    return output;
+    return btoa(output);
   }
 }

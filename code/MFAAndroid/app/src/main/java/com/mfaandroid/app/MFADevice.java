@@ -1,7 +1,9 @@
-package com.androidmfa.app;
+package com.mfaandroid.app;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Base64;
+import android.util.Log;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -24,21 +26,24 @@ public class MFADevice {
 
     /**  Public methods  */
     public String getUuid(){
-        return sharedPref.getString("Uuid", "");
+        return sharedPref.getString("uuid", "");
     }
 
     public String getName(){
-        return sharedPref.getString("Name", "");
+        return sharedPref.getString("name", "");
     }
     
     public boolean setPassword(String inputOldPassword, String inputNewPassword){
-        String oldPasswordHashed = sharedPref.getString("HashedPassword", "");
+        if (inputNewPassword.length() == 0)
+            return false;
+
+        String oldPasswordHashed = sharedPref.getString("hashedPassword", "");
         String inputOldPasswordHashed = hash(inputOldPassword);
         String inputNewPasswordHashed = hash(inputNewPassword);
 
         //  Verify Password
         if (oldPasswordHashed.equals(inputOldPasswordHashed)){
-            sharedPrefEditor.putString("HashedPassword", inputNewPasswordHashed);
+            sharedPrefEditor.putString("hashedPassword", inputNewPasswordHashed);
             sharedPrefEditor.commit();
             return true;
         } else
@@ -46,13 +51,16 @@ public class MFADevice {
     }
 
     public boolean setPin(String inputPassword, String inputNewPin){
-        String oldPasswordHashed = sharedPref.getString("HashedPassword", "");
+        if (inputNewPin.length() == 0)
+            return false;
+
+        String oldPasswordHashed = sharedPref.getString("hashedPassword", "");
         String inputPasswordHashed = hash(inputPassword);
         String inputNewPinHashed = hash(inputNewPin);
 
         //  Verify Password
         if (oldPasswordHashed.equals(inputPasswordHashed)){
-            sharedPrefEditor.putString("HashedPin", inputNewPinHashed);
+            sharedPrefEditor.putString("hashedPin", inputNewPinHashed);
             sharedPrefEditor.commit();
             return true;
         } else
@@ -60,37 +68,40 @@ public class MFADevice {
     }
 
     public boolean setName(String inputPassword, String inputNewName){
-        String oldPasswordHashed = sharedPref.getString("HashedPassword", "");
+        if (inputNewName.length() == 0)
+            return false;
+
+        String oldPasswordHashed = sharedPref.getString("hashedPassword", "");
         String inputPasswordHashed = hash(inputPassword);
 
         //  Verify Password
         if (oldPasswordHashed.equals(inputPasswordHashed)){
-            sharedPrefEditor.putString("Name", inputNewName);
+            sharedPrefEditor.putString("name", inputNewName);
             sharedPrefEditor.commit();
             return true;
         } else
             return false;
     }
 
-    public String getSeedDomain_E_Pin(String domain, String pinNonce){
-        String seedDomain = getSeedDomain(domain);
+    public String getDomainSeed_E_Pin(String domain, String pinNonce){
+        String domainSeed = getDomainSeed(domain);
 
         //  Get OneTimePin
         String oneTimePin = getOneTimePin(pinNonce);
 
         //  Encrypt SeedDomain based on XOR
-        return xor(seedDomain, oneTimePin);
+        return xorBase64(domainSeed, oneTimePin);
     }
 
-    public String getOTP_E_Pin(String domain, String pinNonce){
+    public String getDomainOTP_E_Pin(String domain, String pinNonce){
         //  Get OTP
-        String otp = getOTP(domain);
+        String otp = getDomainOTP(domain);
 
         //  Get OneTimePin
         String oneTimePin = getOneTimePin(pinNonce);
 
         //  Encrypt OTP based on XOR
-        return xor(otp, oneTimePin);
+        return xorBase64(otp, oneTimePin);
     }
 
     public void resetDevice(){
@@ -103,11 +114,11 @@ public class MFADevice {
         String hashedPassword = hash("default");
         String hashedPin = hash("default");
 
-        sharedPrefEditor.putString("Uuid", uuid);
-        sharedPrefEditor.putString("Name", name);
-        sharedPrefEditor.putString("Seed", seed);
-        sharedPrefEditor.putString("HashedPassword", hashedPassword);
-        sharedPrefEditor.putString("HashedPin", hashedPin);
+        sharedPrefEditor.putString("uuid", uuid);
+        sharedPrefEditor.putString("name", name);
+        sharedPrefEditor.putString("seed", seed);
+        sharedPrefEditor.putString("hashedPassword", hashedPassword);
+        sharedPrefEditor.putString("hashedPin", hashedPin);
         sharedPrefEditor.commit();
     }
 
@@ -115,38 +126,38 @@ public class MFADevice {
 
     /**  Test methods */
     public String getSeed(){
-        String seed = sharedPref.getString("Seed", "");
+        String seed = sharedPref.getString("seed", "");
         return seed;
     }
 
     public String getHashedPassword(){
-        String hashedPassword = sharedPref.getString("HashedPassword", "");
+        String hashedPassword = sharedPref.getString("hashedPassword", "");
         return hashedPassword;
     }
 
     public String getHashedPin(){
-        String hashedPin = sharedPref.getString("HashedPin", "");
+        String hashedPin = sharedPref.getString("hashedPin", "");
         return hashedPin;
     }
 
 
 
     /**  Private methods for reuse */
-    public String getSeedDomain(String domain){
-        String seed = sharedPref.getString("Seed", "");
+    public String getDomainSeed(String domain){
+        String seed = sharedPref.getString("seed", "");
         return hash(seed + domain);
     }
 
-    public String getOTP(String domain){
-        String seedDomain = getSeedDomain(domain);
+    public String getDomainOTP(String domain){
+        String domainSeed = getDomainSeed(domain);
 
         //  Make OTP
         long timeStamp = System.currentTimeMillis()/1000/60;  //    Time in minutes
-        return hash(seedDomain+timeStamp);
+        return hash(domainSeed+timeStamp);
     }
 
     private String getOneTimePin(String nonce){
-        String seed = sharedPref.getString("HashedPin", "");
+        String seed = sharedPref.getString("hashedPin", "");
         return hash(seed + nonce);
     }
 
@@ -156,20 +167,23 @@ public class MFADevice {
         try {
             digest = MessageDigest.getInstance("SHA-1");
             digest.update(s.getBytes(),0,s.length());
-            String hash = new BigInteger(1, digest.digest()).toString(16);
-            return hash;
+            String h = new String(Base64.encode(digest.digest(), Base64.DEFAULT));
+            return h.replace("\n", "");
         }
-        catch (NoSuchAlgorithmException e)
-        {
+        catch (NoSuchAlgorithmException e){
             e.printStackTrace();
         }
         return "";
     }
 
-    public static String xor(String msg, String key){
-        StringBuilder output = new StringBuilder();
-        for (int i = 0; i < msg.length(); i++)
-            output.append((char)(msg.charAt(i) ^ key.charAt(i % key.length())));
-        return output.toString();
+    public static String xorBase64(String msg, String key){
+        byte[] decodedMsg = Base64.decode(msg, Base64.DEFAULT);
+        byte[] decodedKey = Base64.decode(key, Base64.DEFAULT);
+
+        byte[] decodedResult = new byte[decodedMsg.length];
+        for (int i = 0; i < decodedMsg.length; i++)
+            decodedResult[i] = (byte) (decodedMsg[i] ^ decodedKey[i % key.length()]);
+        String output = new String(Base64.encode(decodedResult, Base64.DEFAULT));
+        return output.replace("\n", "");
     }
 }
