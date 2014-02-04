@@ -1,0 +1,60 @@
+
+<!-- Refresh -->
+<h4 class="pull-right">Domain: {{tabDomain}}</h4>
+<br>
+
+<!-- Devices info -->
+<h4>Devices</h4>
+<div class="well well-sm">
+  <table class="table" style="margin-bottom:0">
+
+    <thead>
+      <tr>
+        <th style="width: 40%">Name</th>
+        <th style="width: 40%">PINs</th>
+        <th style="width: 20%">Include</th>
+      </tr>
+    </thead>
+
+    <tr ng-repeat="(address, name) in addedDevicesAddresses">
+      <td>{{name}}</td>
+      <td>
+        <input type="text" ng-model="devicesPIN[address]">
+      </td>
+      <td>
+        <input type="checkbox" ng-model="includeDevices[address]">
+      </td>
+    </tr>
+
+  </table>
+
+  <br>
+  <br>
+  <p>
+    <label><input type="checkbox" ng-model="rememberPINs">&nbsp;Remember PINs</label>
+  </p>
+
+  <p>
+    <button class="btn btn-primary" id="OTPsButton" ng-click="getDomainOTP()">Fetch Domain OTPs (Auth)</button>
+  </p>
+
+  <div class="alert alert-success alert-dismissable" id="OTPsNotice" style="display:none">
+    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+    <strong>Success!</strong> {{fetchedOTPsCount}} OTPs copied to clipboard.
+  </div>
+
+  <p>
+    <button class="btn btn-warning" id="domainSeedsButton" ng-click="getDomainSeed()">Fetch Domain Seeds (Setup)</button>
+  </p>
+
+  <div class="alert alert-success alert-dismissable" id="domainSeedsNotice" style="display:none">
+    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+    <strong>Success!</strong> {{fetchedDomainSeedsCount}} Domain seeds copied to clipboard.
+  </div>
+
+
+</div>
+
+
+<a href="#" ng-click="launchAdmin()">Launch Admin Panel
+</a>

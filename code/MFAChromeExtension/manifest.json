@@ -1,0 +1,18 @@
+{
+  "manifest_version": 2,
+
+  "name": "MFA Extension",
+  "description": "This extension is used as a client to the MFA authentication.",
+  "version": "0.1",
+
+  "permissions": [
+    "storage",
+    "tabs",
+    "clipboardWrite"
+  ],
+  "browser_action": {
+    "default_icon": "images/icon38.png", 
+    "default_title": "MFA",
+    "default_popup": "popup.html" 
+  }
+}

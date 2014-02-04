@@ -18,7 +18,7 @@ var MFADevice = function(device){
 
   var status = 'alive';
   this.log = true;
-  this.timeout = 3000;
+  this.timeout = 5000;
   var self = this;
 
   //  OpenMFA methods
@@ -160,7 +160,7 @@ var MFADevice = function(device){
       clearTimeout(busyTimer);
       busyTimer = setTimeout(function(){
         busy = false;
-      },3000);
+      },5000);
     }
     doQuery();
 

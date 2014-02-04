@@ -64,16 +64,14 @@ app.controller('DeviceAdminController', ['$scope', '$routeParams', '$location', 
 		}
 
 		$scope.getDomainSeed = function(pin, domain){
-			var pinNonce = new Date().getTime();
-			$scope.mfaDevice.getDomainSeed(domain, pinNonce, pin, function(response){
+			$scope.mfaDevice.getDomainSeed(domain, pin, function(response){
 				$scope.requestedDomainSeed = response.domainSeed;
 				$scope.safeApply();
 			});
 		}
 
 		$scope.getDomainOTP = function(pin, domain){
-			var pinNonce = new Date().getTime();
-			$scope.mfaDevice.getDomainOTP(domain, pinNonce, pin, function(response){
+			$scope.mfaDevice.getDomainOTP(domain, pin, function(response){
 				$scope.requestedDomainOTP = response.domainOTP;
 				$scope.safeApply();
 			});

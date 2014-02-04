@@ -33,8 +33,8 @@ app.controller('DevicesController', ['$scope', '$location', 'devicesService', fu
 	$scope.init();
 
 
-	$scope.addDeviceAddress = function(address){
-		$scope.addedDevicesAddresses[address] = true;
+	$scope.addDeviceAddress = function(address, name){
+		$scope.addedDevicesAddresses[address] = name;
 		$scope.saveAddedDevicesToStore();
 	}
 

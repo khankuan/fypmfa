@@ -1,0 +1,19 @@
+.table > tbody > tr > td{
+	vertical-align: middle;
+}
+
+.center{
+	width: 80%;
+	left: 10%;
+	text-align: center;
+	top: 50%;
+	position: absolute;
+}
+
+.form-control{
+	margin-bottom: 0.5em;
+}
+
+body{
+	-webkit-user-select: text;
+}

@@ -11,7 +11,7 @@
   ],
   "app": {
     "background": {
-      "scripts": ["js/main.js"]
+      "scripts": ["js/main.js", "js/MFADevice.js", "js/vendor/sha1.js", "js/vendor/enc-base64-min.js"]
     }
   }
 }
