@@ -47,7 +47,7 @@ app.controller('DevicesController', ['$scope', '$location', function($scope, $lo
 			var OTPs = [];
 			for (var d in message.items)
 				OTPs.push(message.items[d]);
-			$scope.fetchedOTPsCount = OTPs.length;
+			$scope.fetchedDomainOTPsCount = OTPs.length;
 			console.log(message);
 			copyTextToClipboard(JSON.stringify(OTPs));
 			$("#OTPsNotice").fadeIn();
@@ -115,6 +115,7 @@ app.controller('DevicesController', ['$scope', '$location', function($scope, $lo
 			if ($scope.includeDevices[d] == true)
 				m.devicesPIN[d] = $scope.devicesPIN[d];
 		m.domain = $scope.tabDomain;
+		$scope.fetchingDomainSeedsCount = Object.keys(m.devicesPIN).length;
 		chrome.runtime.sendMessage("cinhnmhhlcpcdhpaanecmieiphgmddpg", m);
 		$scope.rememberPopupData();
 		$('#domainSeedsButton').prop('disabled', true);
@@ -129,6 +130,7 @@ app.controller('DevicesController', ['$scope', '$location', function($scope, $lo
 			if ($scope.includeDevices[d] == true)
 				m.devicesPIN[d] = $scope.devicesPIN[d];
 		m.domain = $scope.tabDomain;
+		$scope.fetchingDomainOTPsCount = Object.keys(m.devicesPIN).length;
 		chrome.runtime.sendMessage("cinhnmhhlcpcdhpaanecmieiphgmddpg", m);
 		$scope.rememberPopupData();
 		$('#OTPsButton').prop('disabled', true);
