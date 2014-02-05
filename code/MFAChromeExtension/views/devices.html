@@ -38,8 +38,7 @@
     <button class="btn btn-primary" id="OTPsButton" ng-click="getDomainOTP()">Fetch Domain OTPs (Auth)</button>
   </p>
 
-  <div class="alert alert-success alert-dismissable" id="OTPsNotice" style="display:none">
-    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+  <div class="alert alert-success" id="OTPsNotice" style="display:none">
     <strong>Success!</strong> {{fetchedDomainOTPsCount}} of {{fetchingDomainOTPsCount}} OTPs copied to clipboard.
   </div>
 
@@ -47,8 +46,7 @@
     <button class="btn btn-warning" id="domainSeedsButton" ng-click="getDomainSeed()">Fetch Domain Seeds (Setup)</button>
   </p>
 
-  <div class="alert alert-success alert-dismissable" id="domainSeedsNotice" style="display:none">
-    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+  <div class="alert alert-success" id="domainSeedsNotice" style="display:none">
     <strong>Success!</strong> {{fetchedDomainSeedsCount}} of {{fetchingDomainSeedsCount}}  Domain seeds copied to clipboard.
   </div>
 
