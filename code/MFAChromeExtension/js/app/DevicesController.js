@@ -17,8 +17,8 @@ app.controller('DevicesController', ['$scope', '$location', function($scope, $lo
 
 	chrome.runtime.onMessageExternal.addListener(function (message, sender, sendResponse){
 		if (message.type == "GetDevices"){
-			$scope.addedDevicesAddresses = message.items;
-			for (var d in message.items){
+			$scope.addedDevicesAddresses = message.results;
+			for (var d in message.results){
 				if ($scope.devicesPIN[d] == undefined)
 					$scope.devicesPIN[d] = "";
 				if ($scope.includeDevices[d] == undefined)
@@ -29,8 +29,8 @@ app.controller('DevicesController', ['$scope', '$location', function($scope, $lo
 
 		if (message.type == "GetDomainSeed"){
 			var domainSeeds = [];
-			for (var d in message.items)
-				domainSeeds.push(message.items[d]);
+			for (var d in message.results)
+				domainSeeds.push(message.results[d]);
 			$scope.fetchedDomainSeedsCount = domainSeeds.length;
 			console.log(message);
 			copyTextToClipboard(JSON.stringify(domainSeeds));
@@ -45,8 +45,8 @@ app.controller('DevicesController', ['$scope', '$location', function($scope, $lo
 
 		if (message.type == "GetDomainOTP"){
 			var OTPs = [];
-			for (var d in message.items)
-				OTPs.push(message.items[d]);
+			for (var d in message.results)
+				OTPs.push(message.results[d]);
 			$scope.fetchedDomainOTPsCount = OTPs.length;
 			console.log(message);
 			copyTextToClipboard(JSON.stringify(OTPs));

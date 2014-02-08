@@ -1,7 +1,10 @@
 package com.mfaandroid.app;
 
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -41,6 +44,8 @@ public class MFAService extends Service {
     }
 
     public void handleMessage(String msg, CallBack callback) {
+        doNotify(5000);
+
         try {
             JSONObject m = new JSONObject(msg);
             JSONObject response = new JSONObject();
@@ -89,6 +94,8 @@ public class MFAService extends Service {
                 String pinNonce = m.getString("pinNonce");
                 response.put("domainSeed_E_Pin", mfaDevice.getDomainSeed_E_Pin(domain, pinNonce));
                 response.put("domainSeedAnswer", mfaDevice.getDomainSeed(domain));
+                response.put("uuid", mfaDevice.getUuid());
+                response.put("name", mfaDevice.getName());
 
 
             } else if (queryType.equals("getDomainOTP_E_Pin")){
@@ -96,6 +103,8 @@ public class MFAService extends Service {
                 String pinNonce = m.getString("pinNonce");
                 response.put("domainOTP_E_Pin", mfaDevice.getDomainOTP_E_Pin(domain, pinNonce));
                 response.put("domainOTPAnswer", mfaDevice.getDomainOTP(domain));
+                response.put("uuid", mfaDevice.getUuid());
+                response.put("name", mfaDevice.getName());
 
 
             } else if (queryType.equals("resetDevice")){
@@ -146,6 +155,35 @@ public class MFAService extends Service {
             e.printStackTrace();
         }
     }
+
+
+
+    /*  Notification    */
+    int LED_NOTIFICATION_ID = 8273;
+    private Handler mHandler = new Handler();
+
+    private Runnable mClearLED_Task = new Runnable(){
+        public void run(){
+            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            nm.cancel(LED_NOTIFICATION_ID);
+            Log.d("MFAService", "Cancel Notification");
+        }
+    };
+
+    public void doNotify(int duration){
+        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        Notification notif = new Notification();
+        notif.ledARGB = 0xFFffffff;
+        notif.flags = Notification.FLAG_SHOW_LIGHTS;
+        notif.ledOnMS = 500;
+        notif.ledOffMS = 300;
+        notif.flags |= Notification.FLAG_SHOW_LIGHTS;
+        notif.priority = Notification.PRIORITY_MAX;
+        nm.notify(LED_NOTIFICATION_ID, notif);
+        Log.d("MFASerivce", "Do Notification");
+
+        mHandler.postDelayed(mClearLED_Task, duration);
+    };
 }
 
 interface CallBack{

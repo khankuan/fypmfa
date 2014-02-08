@@ -18,7 +18,7 @@ var MFADevice = function(device){
 
   var status = 'alive';
   this.log = true;
-  this.timeout = 3000;
+  this.timeout = 5000;
   var self = this;
 
   //  OpenMFA methods
@@ -123,7 +123,7 @@ var MFADevice = function(device){
   var tries;
   var deviceConnectCallback;
   var busyTimer;
-  var triesLimit = 25;
+  var triesLimit = 22;
 
   //  Connection methods
   function isBusy(){
@@ -246,9 +246,8 @@ var MFADevice = function(device){
           if (tries < triesLimit){
             send(msg);
           } else {
-            disconnect(function(){
-            });
-            busy = false;
+            //disconnect(function(){});
+            //busy = false;
           }
           tries++;
         }, 200);

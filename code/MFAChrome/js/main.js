@@ -50,19 +50,19 @@ chrome.runtime.onMessageExternal.addListener(function (message, sender, sendResp
 				var devicesPIN = message.devicesPIN;
 
 				var done = 0;
-				var items = {};
-				function itemCallback(address, item){
+				var results = {};
+				function itemCallback(address, result){
 					done++;
 
-					if (item != undefined)
-						items[address] = item;
+					if (result != undefined)
+						results[address] = result;
 
-					console.log("done++", item);
+					console.log("done++", result);
 					if (done == devicesKey.length){
-						console.log("done", {type:message.type, items:items}, sender);
+						console.log("done", {type:message.type, results:results}, sender);
 						var m = {};
 						m.type = message.type;
-						m.items = items;
+						m.results = results;
 						chrome.runtime.sendMessage(sender.id, m);
 					}
 				}
@@ -83,21 +83,37 @@ chrome.runtime.onMessageExternal.addListener(function (message, sender, sendResp
 					
 					if (message.type == "GetDomainSeed"){
 						device.getDomainSeed(message.domain, devicesPIN[devicesKey[i]], function(response){
-							if(response != undefined)
-								itemCallback(devicesKey[i], response.domainSeed);
+							if (response != undefined)
+								itemCallback(devicesKey[i], {domainSeed: response.domainSeed, uuid: response.uuid, name: response.name});
 							else
 								itemCallback();
+
 							device.destroy();
-							callAPI(i+1);
+
+							var delay = 2000;
+							if (response == undefined)
+								delay = 4000;
+
+							setTimeout(function(){
+								callAPI(i+1);
+							},delay);
 						});
 					} else if (message.type == "GetDomainOTP"){
 						device.getDomainOTP(message.domain, devicesPIN[devicesKey[i]], function(response){
-							if(response != undefined)
-								itemCallback(devicesKey[i], response.domainOTP);
+							if (response != undefined)
+								itemCallback(devicesKey[i], {domainOTP: response.domainOTP, uuid: response.uuid, name: response.name});
 							else
 								itemCallback();
+							
 							device.destroy();
-							callAPI(i+1);
+
+							var delay = 2000;
+							if (response == undefined)
+								delay = 4000;
+
+							setTimeout(function(){
+								callAPI(i+1);
+							},delay);
 						});
 					}
 				}
@@ -120,10 +136,11 @@ chrome.runtime.onMessageExternal.addListener(function (message, sender, sendResp
 
 	if (message.type == "GetDevices"){
 		chrome.storage.local.get('devicesAddresses', function(result){
-			var items = {};
+			var results = {};
 			if (result.devicesAddresses != undefined)
-				items = JSON.parse(result.devicesAddresses);
-			chrome.runtime.sendMessage(sender.id, {type:message.type, items:items});
+				results = JSON.parse(result.devicesAddresses);
+			console.log(result.devicesAddresses);
+			chrome.runtime.sendMessage(sender.id, {type:message.type, results:results});
 		});
 	}
 })
