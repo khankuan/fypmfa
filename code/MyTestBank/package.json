@@ -1,0 +1,12 @@
+{
+    "name": "node-mytestbank-server",
+    "version": "0.0.0",
+    "description": "mytestbank-server",
+    "dependencies": {
+        "express": "latest",
+        "crypto": "latest",
+        "mongoose": "latest"
+    },
+    "author": "kuan"
+}
+
