@@ -3,7 +3,7 @@ var ObjectId = mongoose.Schema.Types.ObjectId;
 
 var sessionSchema = new mongoose.Schema({
 	userId: ObjectId,
-	sessionId: String,
+	sessionId: { type: String, unique: true },
 	dateCreated: { type: Date, default: Date.now }
 })
 
