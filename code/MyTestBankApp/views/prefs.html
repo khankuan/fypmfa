@@ -1,0 +1,42 @@
+<h1>Preferences</h1>
+<p>Logged in as {{$root.username}}<p>
+
+<button class="btn btn-primary" ng-click="$root.goToHome()">Home</button>
+<button class="btn btn-danger" ng-click="$root.logout()">Logout</button>
+
+
+<div class="well">
+	<h4>Your Devices</h4>
+	<table class="table" style="margin-bottom:0">
+
+	    <thead>
+	      <tr>
+	        <th style="width: 40%">Uuid</th>
+	        <th style="width: 40%">Name</th>
+	        <th style="width: 20%"></th>
+	      </tr>
+	    </thead>
+
+		<tr ng-repeat="d in devices">
+	      <td>{{d.uuid}}</td>
+	      <td>{{d.name}}</td>
+	      <td>
+	        <button type="button" class="btn btn-primary" ng-click="removeDevice(d.uuid)" style="width:6em">Remove</button>
+	      </td>
+	    </tr>
+
+	</table>
+	<p ng-show="devicesEmpty()">You have no devices currently.</p>
+</div>
+
+<div class="well">
+	<h4>Device Count</h4>
+	<input class="form-control" type="text" ng-model="deviceCount" placeholder="Device Count"></input>
+	<button class="btn btn-primary" ng-click="setDeviceCount(deviceCount)">Save</button>
+</div>
+
+<div class="well">
+	<h4>Add Devices</h4>
+	<input class="form-control" type="text" ng-model="domainSeedString" placeholder="Domain Seed String"></input>
+	<button class="btn btn-primary" ng-click="addDevices(domainSeedString); domainSeedString = '';">Add</button>
+</div>

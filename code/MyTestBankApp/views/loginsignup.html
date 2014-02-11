@@ -1,0 +1,40 @@
+<h4>My Test Bank</h4>
+
+<div>
+  <!-- Header -->
+  <ul class="nav nav-pills">
+    <li ng-class="{active: tabIndex == 0}"><a href="" ng-click="tabIndex = 0">Login</a></li>
+    <li ng-class="{active: tabIndex == 1}"><a href="" ng-click="tabIndex = 1">Signup</a></li>
+  </ul>
+
+  <br>
+
+  <!-- Login -->
+  <div class="well" ng-show="tabIndex == 0">
+    <h4>Login</h4>
+    <input class="form-control" type="text" placeholder="Username" ng-model="loginUsername"></input>
+    <input class="form-control" type="text" placeholder="Password" ng-model="loginPassword"></input>
+    <input class="form-control" type="text" placeholder="OTPString" ng-model="loginOTPString"></input>
+    <button class="btn btn-primary" ng-click="login()">Login</button>
+
+    <br>
+    <br>
+    <div class="alert alert-danger" ng-show="loginError">
+      <a class="alert-link">Unable to Login</a>
+    </div>
+  </div>
+
+  <!-- Signup -->
+  <div class="well" ng-show="tabIndex == 1">
+    <h4>Sign up</h4>
+    <input class="form-control" type="text" placeholder="Username" ng-model="signupUsername"></input>
+    <input class="form-control" type="text" placeholder="Password" ng-model="signupPassword"></input>
+    <button class="btn btn-primary" ng-click="signup()">Sign up</button>
+
+    <br>
+    <br>
+    <div class="alert alert-danger" ng-show="signupError">
+      <a class="alert-link">Unable to Signup</a>
+    </div>
+  </div>
+</div>

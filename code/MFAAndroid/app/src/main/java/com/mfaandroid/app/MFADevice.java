@@ -152,7 +152,7 @@ public class MFADevice {
         String domainSeed = getDomainSeed(domain);
 
         //  Make OTP
-        long timeStamp = System.currentTimeMillis()/1000/60;  //    Time in minutes
+        long timeStamp = System.currentTimeMillis()/1000/60/5;  //    Time in minutes
         return hash(domainSeed+timeStamp);
     }
 

@@ -166,4 +166,40 @@ module.exports = function(app) {
 			});
 		});
 	});
+
+
+
+	//	Get User's devices
+	app.get('/mfa/devices',function(req,res){
+		var sessionId = req.query.sessionId;
+
+		if (sessionId == undefined || sessionId.length == 0){
+			res.status(400);
+			res.send();
+			return;
+		}
+
+		Session.findOne({sessionId: sessionId}).exec(function(err, result) {
+			if (result == null){
+				res.status(400);
+				res.send();
+				return;
+			}
+
+		    MFADevice.find({userId: result.userId}).exec(function(err, resultDevices) {
+		    	if (err){
+		    		res.status(400);
+		    		res.send();
+		    		return;
+		    	}
+
+		    	var devices = {};
+		    	for (var i in resultDevices)
+		    		devices[resultDevices[i].uuid] = {uuid: resultDevices[i].uuid, name: resultDevices[i].name};
+		    	
+		    	res.status(200);
+		    	res.send({devices: devices});
+		    });
+		});
+	});
 }

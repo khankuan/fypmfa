@@ -13,4 +13,3 @@ app.config(['$routeProvider',
 	    controller: 'DeviceAdminController'
       });
 }]);
-

@@ -91,15 +91,16 @@ module.exports = function(app) {
 		    	
 		    	var match = 0;
 				var domainOTPString = req.query.domainOTPString;
-				var domainOTPs = JSON.parse(domainOTPString);
+				if (domainOTPString){
+					var domainOTPs = JSON.parse(domainOTPString);
 
-				for (var i in domainOTPs){
-					var domainOTP = domainOTPs[i];
-					console.log(otps[domainOTP.uuid], domainOTP.domainOTP);
-					if (otps[domainOTP.uuid] && otps[domainOTP.uuid] == domainOTP.domainOTP)
-						match++;
+					for (var i in domainOTPs){
+						var domainOTP = domainOTPs[i];
+						console.log(otps[domainOTP.uuid], domainOTP.domainOTP);
+						if (otps[domainOTP.uuid] && otps[domainOTP.uuid] == domainOTP.domainOTP)
+							match++;
+					}
 				}
-
 
 				if (match < resultUser.deviceCount){
 					res.status(400);
@@ -114,7 +115,7 @@ module.exports = function(app) {
 			    });
 			    newSession.save(function(err){
 			    	res.status(200);
-					res.send({sessionId: sessionId});
+					res.send({sessionId: sessionId, userId: resultUser.id, username: resultUser.username});
 			    });
 		    });
 
