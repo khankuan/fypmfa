@@ -10,8 +10,9 @@ getOTP64_E_Pin,google.com,2308191,12123123?
 
 #include <EEPROM.h>
 #include "OpenMFA.h"
-//#include <SoftwareSerial.h>
+#include <SoftwareSerial.h>
 #include "Base64.h"
+#include "aJson.h"
 OpenMFA *device;
 
 #define RxD 7
@@ -81,29 +82,21 @@ void loop()
     buffer[buffer_i] = recvChar;
     if (buffer_i > 254)
       buffer_i = 0;
-    if (recvChar == '?'){
+    if (recvChar == '*'){
       buffer[buffer_i+1] = '\0';
-      char* cmd = new char[buffer_i+1];
-      memcpy(cmd, buffer, buffer_i);
-      cmd[buffer_i] = '\0';
-      
-      //Serial.print(" Command: ");
-      //Serial.print(cmd);
-      //Serial.println("?");
+      char* msg = new char[buffer_i+1];
+      memcpy(msg, buffer, buffer_i+1);
       
       //  Process
-      char** args = new char*[10];
-      int argc = commandToArgs(cmd, args);
+      Serial.println(msg);
+      aJsonObject* cmd = aJson.parse(msg);
       
-      char *output = new char[100];
-      argsToOpenMFAMethod(args, argc, output);
-      Serial.print(args[0]);
-      Serial.print(",");
-      Serial.print(output);
-      Serial.print("?");
+      char *output = new char[256];
+      argsToOpenMFAMethod(cmd, output);
+      Serial.print(aJson.getObjectItem(cmd, "queryType")->valuestring);
+
       
       //  Free memory
-      free(args);
       free(cmd);
       free(output);
       
@@ -175,49 +168,61 @@ int commandToArgs(char* command, char** args){
 
 
 //  Call the OpenMFA device with a set of arguments
-void argsToOpenMFAMethod(char **args, int argc, char* output){
+void argsToOpenMFAMethod(aJsonObject *cmd, char* output){
    //  Get method
-   char *method = args[0];
-   
+   char *method = aJson.getObjectItem(cmd, "queryType")->valuestring;
+   Serial.println(method);
+   return;
    //  getUuid
-   if (strcmp(method, "getUuid") == 0 && argc == 1){
+   if (strcmp(method, "getUuid") == 0){
      strcpy(output,(*device).getUuid());
    
    //  getName
-   } else if (strcmp(method, "getName") == 0 && argc == 1){
+   } else if (strcmp(method, "getName") == 0){
      strcpy(output,(*device).getName());
    
    //  setPassword
-   } else if (strcmp(method, "setPassword") == 0 && argc == 3){
-     if ((*device).setPassword(args[1],args[2]))
+   } else if (strcmp(method, "setPassword") == 0){
+     char *old_password = aJson.getObjectItem(cmd, "oldPassword")->valuestring;
+     char *new_password = aJson.getObjectItem(cmd, "newPassword")->valuestring;
+     if ((*device).setPassword(old_password, new_password))
        strcpy(output,"OK");
      else
        strcpy(output,"FAIL");
    
    //  setPin
-   } else if (strcmp(method, "setPin") == 0 && argc == 3){
-     if ((*device).setPin(args[1],args[2]))
+   } else if (strcmp(method, "setPin") == 0){
+     char *old_password = aJson.getObjectItem(cmd, "oldPassword")->valuestring;
+     char *new_pin = aJson.getObjectItem(cmd, "newPin")->valuestring;
+     if ((*device).setPin(old_password, new_pin))
        strcpy(output,"OK");
      else
        strcpy(output,"FAIL");
    
    //  setName
-   } else if (strcmp(method, "setName") == 0 && argc == 3){
-     if ((*device).setName(args[1],args[2]))
+   } else if (strcmp(method, "setName") == 0){
+     char *old_password = aJson.getObjectItem(cmd, "oldPassword")->valuestring;
+     char *new_name = aJson.getObjectItem(cmd, "newName")->valuestring;
+     if ((*device).setName(old_password, new_name))
        strcpy(output,"OK");
      else
        strcpy(output,"FAIL");
    
    //  getSeedDomain64_E_Pin
-   } else if (strcmp(method, "getSeedDomain64_E_Pin") == 0 && argc == 3){
-     strcpy(output,(*device).getSeedDomain64_E_Pin(args[1], atol(args[2])));
+   } else if (strcmp(method, "getSeedDomain64_E_Pin") == 0){
+     char *domain = aJson.getObjectItem(cmd, "domain")->valuestring;
+     char *pinNonce = aJson.getObjectItem(cmd, "pinNonce")->valuestring;
+     strcpy(output,(*device).getSeedDomain64_E_Pin(domain, atol(pinNonce)));
    
    //  getOTP64_E_Pin
-   } else if (strcmp(method, "getOTP64_E_Pin") == 0 && argc == 4){
-     strcpy(output,(*device).getOTP64_E_Pin(args[1], atol(args[2]), atol(args[3])));
+   } else if (strcmp(method, "getOTP64_E_Pin") == 0){
+     char *domain = aJson.getObjectItem(cmd, "domain")->valuestring;
+     char *pinNonce = aJson.getObjectItem(cmd, "pinNonce")->valuestring;
+     char *timestamp = aJson.getObjectItem(cmd, "timestamp")->valuestring;
+     strcpy(output,(*device).getOTP64_E_Pin(domain, atol(pinNonce), atol(timestamp)));
    
    //  resetDevice
-   } else if (strcmp(method, "resetDevice") == 0 && argc == 1){
+   } else if (strcmp(method, "resetDevice") == 0){
      (*device).resetDevice();
      strcpy(output,"OK");
    
@@ -225,3 +230,4 @@ void argsToOpenMFAMethod(char **args, int argc, char* output){
    } else
      strcpy(output,"INVALID");
 }
+

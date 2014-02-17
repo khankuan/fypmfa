@@ -78,7 +78,7 @@ size_t Sha1Class::write(uint8_t data) {
 }
 
 size_t Sha1Class::pad() {
-  // Implement SHA-1 padding (fips180-2 ¬¨√ü5.1.1)
+  // Implement SHA-1 padding (fips180-2 ¬¨¬®‚àö√º5.1.1)
 
   // Pad with 0x80 followed by 0x00 until the end of the block
   addUncounted(0x80);
@@ -148,5 +148,6 @@ uint8_t* Sha1Class::resultHmac(void) {
   return result();
 }
 Sha1Class Sha1;
+
 
 
