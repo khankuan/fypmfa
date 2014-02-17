@@ -44,18 +44,6 @@ void setup()
     Serial.println("OpenMFA Device Setup Complete.\n");
 }
 
-void setBaudRate()
-{
-    Serial.println('$$$');
-    delay(1);
-    Serial.println('SU,11');
-    delay(1);
-    Serial.println('---');
-    delay(1);
-    //Serial.begin(19200);
-    //delay(1);
-    Serial.println('---');
-}
 
 //  Variables in loop
 char recvChar;
@@ -65,17 +53,6 @@ int buffer_i = 0;
     
 void loop()
 {
-//  digitalWrite(LED_PIN, HIGH);
-//  delay(300);
-//  digitalWrite(LED_PIN, LOW);
-//  delay(300);
-//  
-//  while (Serial.available()){//check if there's any data sent from the remote bluetooth shield
-//    recvChar = Serial.read();
-//    Serial.print(recvChar);
-//    Serial.print(",");
-//  }
-
   if (Serial.available()){//check if there's any data sent from the remote bluetooth shield
     recvChar = Serial.read();
     //Serial.print(recvChar); //  Do not print out, might be slow.
@@ -83,21 +60,19 @@ void loop()
     if (buffer_i > 254)
       buffer_i = 0;
     if (recvChar == '*'){
-      buffer[buffer_i+1] = '\0';
-      char* msg = new char[buffer_i+1];
-      memcpy(msg, buffer, buffer_i+1);
+      buffer[buffer_i] = '\0';
       
       //  Process
-      Serial.println(msg);
-      aJsonObject* cmd = aJson.parse(msg);
+      Serial.println(buffer);
+      aJsonObject* cmd = aJson.parse(buffer);
       
-      char *output = new char[256];
-      argsToOpenMFAMethod(cmd, output);
-      Serial.print(aJson.getObjectItem(cmd, "queryType")->valuestring);
-
+      aJsonObject *response = cmdToOpenMFAMethod(cmd); 
+      char *output = aJson.print(response);
+      Serial.println(output);
       
       //  Free memory
-      free(cmd);
+      aJson.deleteItem(cmd);
+      aJson.deleteItem(response);
       free(output);
       
       buffer_i = 0;
@@ -124,19 +99,19 @@ void printDeviceInfo(){
     Serial.println();
     free(output);
     
-    output = (*device).getSeed64();
+    output = (*device).getSeed();
     Serial.print("Seed: ");
     Serial.print(output);
     Serial.println();
     free(output);
     
-    output = (*device).getHashedPassword64();
+    output = (*device).getHashedPassword();
     Serial.print("Hashed Password: ");
     Serial.print(output);
     Serial.println();
     free(output);
     
-    output = (*device).getHashedPin64();
+    output = (*device).getHashedPin();
     Serial.print("Hashed Pin: ");
     Serial.print(output);
     Serial.println();
@@ -144,90 +119,128 @@ void printDeviceInfo(){
 }
 
 
-
-//  Convert a string command to arguments
-int commandToArgs(char* command, char** args){
-  int argc = 0;
-  
-  //  Max 10 arguments
-  args[0] = command;
-  argc += 1;
-  
-  //  Change to string
-  int len = strlen(command);
-  for (int i = 0; i < len; i++){
-    if (command[i]  == ','){
-      command[i] = '\0';
-      args[argc] = command+i+1;
-      argc++;
-    }
-  }
-  
-  return argc;
-}
-
-
 //  Call the OpenMFA device with a set of arguments
-void argsToOpenMFAMethod(aJsonObject *cmd, char* output){
+aJsonObject* cmdToOpenMFAMethod(aJsonObject *cmd){
    //  Get method
    char *method = aJson.getObjectItem(cmd, "queryType")->valuestring;
    Serial.println(method);
-   return;
+   
+   //  Output
+   aJsonObject *response = aJson.createObject();
+   
    //  getUuid
    if (strcmp(method, "getUuid") == 0){
-     strcpy(output,(*device).getUuid());
+     aJson.addStringToObject(response, "uuid", (*device).getUuid());
    
    //  getName
    } else if (strcmp(method, "getName") == 0){
-     strcpy(output,(*device).getName());
+     aJson.addStringToObject(response, "name", (*device).getName());
    
    //  setPassword
    } else if (strcmp(method, "setPassword") == 0){
-     char *old_password = aJson.getObjectItem(cmd, "oldPassword")->valuestring;
-     char *new_password = aJson.getObjectItem(cmd, "newPassword")->valuestring;
-     if ((*device).setPassword(old_password, new_password))
-       strcpy(output,"OK");
+     char *oldPassword = aJson.getObjectItem(cmd, "oldPassword")->valuestring;
+     char *newPassword = aJson.getObjectItem(cmd, "newPassword")->valuestring;
+     if ((*device).setPassword(oldPassword, newPassword))
+       aJson.addTrueToObject(response, "success");
      else
-       strcpy(output,"FAIL");
+       aJson.addFalseToObject(response, "success");
+       
+     free(oldPassword);
+     free(newPassword);
    
    //  setPin
    } else if (strcmp(method, "setPin") == 0){
-     char *old_password = aJson.getObjectItem(cmd, "oldPassword")->valuestring;
-     char *new_pin = aJson.getObjectItem(cmd, "newPin")->valuestring;
-     if ((*device).setPin(old_password, new_pin))
-       strcpy(output,"OK");
+     char *oldPassword = aJson.getObjectItem(cmd, "oldPassword")->valuestring;
+     char *newPin = aJson.getObjectItem(cmd, "newPin")->valuestring;
+     if ((*device).setPin(oldPassword, newPin))
+       aJson.addTrueToObject(response, "success");
      else
-       strcpy(output,"FAIL");
+       aJson.addFalseToObject(response, "success");
+       
+     free(oldPassword);
+     free(newPin);
    
    //  setName
    } else if (strcmp(method, "setName") == 0){
-     char *old_password = aJson.getObjectItem(cmd, "oldPassword")->valuestring;
-     char *new_name = aJson.getObjectItem(cmd, "newName")->valuestring;
-     if ((*device).setName(old_password, new_name))
-       strcpy(output,"OK");
+     char *oldPassword = aJson.getObjectItem(cmd, "oldPassword")->valuestring;
+     char *newName = aJson.getObjectItem(cmd, "newName")->valuestring;
+     if ((*device).setName(oldPassword, newName))
+       aJson.addTrueToObject(response, "success");
      else
-       strcpy(output,"FAIL");
+       aJson.addFalseToObject(response, "success");
+       
+     free(oldPassword);
+     free(newName);
    
-   //  getSeedDomain64_E_Pin
-   } else if (strcmp(method, "getSeedDomain64_E_Pin") == 0){
+   //  getDomainSeed_E_Pin
+   } else if (strcmp(method, "getDomainSeed_E_Pin") == 0){
      char *domain = aJson.getObjectItem(cmd, "domain")->valuestring;
      char *pinNonce = aJson.getObjectItem(cmd, "pinNonce")->valuestring;
-     strcpy(output,(*device).getSeedDomain64_E_Pin(domain, atol(pinNonce)));
+     aJson.addStringToObject(response, "domainSeed_E_Pin", (*device).getDomainSeed_E_Pin(domain, pinNonce));
+     aJson.addStringToObject(response, "domainSeedAnswer", (*device).getDomainSeed(domain));
+     aJson.addStringToObject(response, "uuid", (*device).getUuid());
+     aJson.addStringToObject(response, "name", (*device).getName());
+       
+     free(domain);
+     free(pinNonce);
    
-   //  getOTP64_E_Pin
-   } else if (strcmp(method, "getOTP64_E_Pin") == 0){
+   //  getDomainOTP_E_Pin
+   } else if (strcmp(method, "getDomainOTP_E_Pin") == 0){
      char *domain = aJson.getObjectItem(cmd, "domain")->valuestring;
      char *pinNonce = aJson.getObjectItem(cmd, "pinNonce")->valuestring;
-     char *timestamp = aJson.getObjectItem(cmd, "timestamp")->valuestring;
-     strcpy(output,(*device).getOTP64_E_Pin(domain, atol(pinNonce), atol(timestamp)));
+     long timestamp = aJson.getObjectItem(cmd, "timestamp")->valueint;
+     aJson.addStringToObject(response, "domainOTP_E_Pin", (*device).getDomainOTP_E_Pin(domain, pinNonce, timestamp));
+     aJson.addStringToObject(response, "domainOTPAnswer", (*device).getDomainOTP(domain, timestamp));
+     aJson.addStringToObject(response, "uuid", (*device).getUuid());
+     aJson.addStringToObject(response, "name", (*device).getName());
+       
+     free(domain);
+     free(pinNonce);
    
    //  resetDevice
    } else if (strcmp(method, "resetDevice") == 0){
      (*device).resetDevice();
-     strcpy(output,"OK");
+     aJson.addTrueToObject(response, "success");
    
-   //  Invalid
-   } else
-     strcpy(output,"INVALID");
+   //  updateInfo
+   } else if (strcmp(method, "updateInfo") == 0){
+     char *password = aJson.getObjectItem(cmd, "password")->valuestring;
+     char *newName = aJson.getObjectItem(cmd, "newName")->valuestring;
+     char *newPin = aJson.getObjectItem(cmd, "newPin")->valuestring;
+     char *newPassword = aJson.getObjectItem(cmd, "newPassword")->valuestring;
+   
+     boolean valid = true;
+     if (newName != NULL)
+       valid = valid && ((*device).setName(password, newName));
+     if (newPin != NULL)
+       valid = valid && ((*device).setPin(password, newPin));
+     if (newPassword != NULL)
+       valid = valid && ((*device).setPassword(password, newPassword));
+     
+     if (valid)
+       aJson.addTrueToObject(response, "success");
+     else
+       aJson.addFalseToObject(response, "success");    
+       
+     free(password);
+     free(newName);    
+     free(newPin);
+     free(newPassword);                 
+     
+   //  getInfo
+   } else if (strcmp(method, "getInfo") == 0){
+     aJson.addStringToObject(response, "uuid", (*device).getUuid());
+     aJson.addStringToObject(response, "name", (*device).getName());
+     aJson.addStringToObject(response, "seed", (*device).getSeed());
+     aJson.addStringToObject(response, "hashedPassword", (*device).getHashedPassword());
+     aJson.addStringToObject(response, "hashedPin", (*device).getHashedPin());
+   
+   }
+   
+   aJson.addStringToObject(response, "queryType", aJson.getObjectItem(cmd, "queryType")->valuestring);
+   aJson.addNumberToObject(response, "timestamp", aJson.getObjectItem(cmd, "timestamp")->valueint);
+     
+   free(method);
+   return response;
 }
 

@@ -144,7 +144,7 @@ public class MFADevice {
 
     /**  Private methods for reuse */
     public String getDomainSeed(String domain){
-        String seed = sharedPref.getString("seed", "");
+        String seed = getSeed();
         return hash(seed + domain);
     }
 

@@ -20,10 +20,10 @@ typedef struct
 {
     char uuid[32];                /* uuid of the device */
     char name[32];                /* readable name of the device */
-    char seed64[32];                /* seed of device */
+    char seed[32];                /* seed of device */
 
-    char hashed_password64[32];     /* SHA-1 hashed password of device */
-    char hashed_pin64[32];          /* SHA-1 hashed pin of device */
+    char hashedPassword[32];     /* SHA-1 hashed password of device */
+    char hashedPin[32];          /* SHA-1 hashed pin of device */
 }
 OpenMFA_data;
 
@@ -35,25 +35,29 @@ public:
     OpenMFA();
     char* getUuid();
     char* getName();
-    bool setPassword(char* old_password, char* new_password);
-    bool setPin(char* password, char* new_pin);
-    bool setName(char* password, char* new_name);
+    bool setPassword(char* inputOldPassword, char* inputNewPassword);
+    bool setPin(char* inputPassword, char* inputNewPin);
+    bool setName(char* inputPassword, char* inputNewName);
     
-    char* getSeedDomain64_E_Pin(char* domain, long pin_nonce);
-    char* getOTP64_E_Pin(char* domain, long time_in_ms, long pin_nonce);
+    char* getDomainSeed_E_Pin(char* domain, char* pinNonce);
+    char* getDomainOTP_E_Pin(char* domain, char* pinNonce, long timeInMS);
+    char* getDomainSeed(char* domain);
+    char* getDomainOTP(char* domain, long timeInMS);
     
     void resetDevice();
 
 
     //  Test methods
-    char* getSeed64();
-    char* getHashedPassword64();
-    char* getHashedPin64();
+    char* getSeed();
+    char* getHashedPassword();
+    char* getHashedPin();
     
 private:
-    char* getSeedDomain64(char* domain);
+    char* getOneTimePin(char* pinNonce);
+    
+    char* hash(char* s);
+    char* xorBase64(char* msg, char* key);
     char* generateRandomBytes(int bytes);
-    char* getOneTimePin64(long nonce);
 };
 
 #endif
