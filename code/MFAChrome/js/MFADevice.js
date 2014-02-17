@@ -10,6 +10,11 @@ getSeedDomain_E_Pin: function (domain, pinNonce, callback)
 getOTP_E_Pin: function (domain, pinNonce, callback)
 resetDevice: function (callback)
 info: function (callback)
+
+Sample queries:
+{"queryType":"getDomainOTP_E_Pin","domain":"mail.google.com","pinNonce":1392606560266,"timestamp":1392606560267} 
+{"queryType":"getInfo","timestamp":1392606608574}
+
 */
 
 
@@ -239,7 +244,7 @@ var MFADevice = function(device){
     });
   }
 
-  function send(msg){
+  function send(msg){console.log(msg);
     chrome.bluetooth.write({socket:socket, data: str2ab(msg)}, function(bytes) {
       if (chrome.runtime.lastError) {
         setTimeout(function(){
@@ -260,7 +265,7 @@ var MFADevice = function(device){
   }
 
   function str2ab(str) {
-    var buf = new ArrayBuffer(str.length+1); // 2 bytes for each char
+    var buf = new ArrayBuffer(str.length+1);
     var bufView = new Uint8Array(buf);
     for (var i = 0, strLen = str.length; i < strLen; i++)
       bufView[i] = str.charCodeAt(i);

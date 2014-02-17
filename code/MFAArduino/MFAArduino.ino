@@ -14,10 +14,10 @@ getOTP64_E_Pin,google.com,2308191,12123123?
 #include "Base64.h"
 OpenMFA *device;
 
-#define RxD 1
-#define TxD 0
+#define RxD 7
+#define TxD 8
 #define LED_PIN 13
-//SoftwareSerial blueToothSerial(RxD,TxD);
+SoftwareSerial blueToothSerial(RxD,TxD);
 
 void setup()
 {
@@ -31,7 +31,7 @@ void setup()
     
     //  Init
     *device = OpenMFA();
-    //(*device).resetDevice(); Serial.println("OpenMFA Device Reset done.");   
+    (*device).resetDevice(); Serial.println("OpenMFA Device Reset done.");   
     //printDeviceInfo();
      
     //  Command tests
