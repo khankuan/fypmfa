@@ -2,6 +2,7 @@ app.controller('DevicesController', ['$scope', '$location', function($scope, $lo
     $scope.addedDevicesAddresses = {};	//	To load from store
     $scope.includeDevices = {};	//	To load from store
     $scope.devicesPIN = {};
+    $scope.tabProtocol = "asd";
     $scope.tabDomain = "asd";
 
 	$scope.safeApply = function(fn) {
@@ -78,6 +79,9 @@ app.controller('DevicesController', ['$scope', '$location', function($scope, $lo
 		chrome.tabs.getSelected(function(tab){
 			var tmp = document.createElement('a');
 			tmp.href = tab.url;
+			$scope.tabProtocol = tmp.protocol;
+			if ($scope.tabProtocol[$scope.tabProtocol.length-1] == ":")
+				$scope.tabProtocol = $scope.tabProtocol.substring(0, $scope.tabProtocol.length-1);
 			$scope.tabDomain = tmp.hostname;
 			$scope.safeApply();
 		});

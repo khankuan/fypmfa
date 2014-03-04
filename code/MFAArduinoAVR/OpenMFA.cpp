@@ -189,19 +189,23 @@ void OpenMFA::resetDevice()
     
     //  Seed
     char *randomBytes = generateRandomBytes(32);
+    
     char *seed = hash(randomBytes);
-    base64_encode(OpenMFA_data.seed, seed, SHA1_DEFAULT_KEY_LENGTH);
+    memcpy(OpenMFA_data.seed, seed, strlen(seed));
+    
     free(randomBytes);
     free(seed);
     
     //  Password and pin
     char *hashedPassword = hash("default");
-    char *hashedPin = hash("default");
-    strcpy(OpenMFA_data.hashedPassword, hashedPassword);  //  pin same as password for default
-    strcpy(OpenMFA_data.hashedPin, hashedPin);  //  pin same as password for default
+    
+    memcpy(OpenMFA_data.hashedPassword, hashedPassword, sizeof(OpenMFA_data.hashedPassword));
     free(hashedPassword);
+    
+    char *hashedPin = hash("default");
+    memcpy(OpenMFA_data.hashedPin, hashedPin, sizeof(OpenMFA_data.hashedPin));
     free(hashedPin);
-    Serial.println("asd3");
+    Serial.println("Asd");
     
     //  Store
     EEPROM_writeAnything(0, OpenMFA_data);
@@ -288,15 +292,17 @@ char* OpenMFA::hash(char *s)
 {
     Sha1.initHmac((uint8_t*)SHA1_DEFAULT_KEY, SHA1_DEFAULT_KEY_LENGTH);
     Sha1.print(s);
-    char* result = (char*) Sha1.resultHmac();
+    char *result = (char*) Sha1.resultHmac();
     
     //  encode to base64
     int base64_length = base64_enc_len(SHA1_DEFAULT_KEY_LENGTH);
-    char *resultBase64 = new char[base64_length];
+    char resultBase64[base64_length];
     base64_encode(resultBase64, result, SHA1_DEFAULT_KEY_LENGTH);
-    
     free(result);
     return resultBase64;
+    //char *output = new char[base64_length];
+    //memcpy(output, resultBase64, base64_length);
+    //return output;
 }
 
 
