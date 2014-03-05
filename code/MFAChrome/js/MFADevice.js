@@ -78,6 +78,7 @@ var MFADevice = function(device){
     var q = {queryType: "getDomainOTP_E_Pin"};
     q.domain = domain;
     q.pinNonce = pinNonce;
+    q.timeIn5min = new Date().getTime()/1000/60/5;
     query(q, callback);
   }
 
