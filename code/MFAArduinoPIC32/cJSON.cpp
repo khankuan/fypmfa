@@ -240,6 +240,7 @@ static const char *skip(const char *in) {while (in && *in && (unsigned char)*in<
 cJSON *cJSON_Parse(const char *value)
 {
 	cJSON *c=cJSON_New_Item();
+
 	ep=0;
 	if (!c) return 0;       /* memory fail */
 
@@ -372,14 +373,14 @@ static const char *parse_object(cJSON *item,const char *value)
 	item->type=cJSON_Object;
 	value=skip(value+1);
 	if (*value=='}') return value+1;	/* empty array. */
-	
 	item->child=child=cJSON_New_Item();
 	if (!item->child) return 0;
 	value=skip(parse_string(child,skip(value)));
 	if (!value) return 0;
 	child->string=child->valuestring;child->valuestring=0;
-	if (*value!=':') {ep=value;return 0;}	/* fail! */
+        if (*value!=':') {ep=value;return 0;}	/* fail! */
 	value=skip(parse_value(child,skip(value+1)));	/* skip any spacing, get the value. */
+
 	if (!value) return 0;
 	
 	while (*value==',')

@@ -17,11 +17,6 @@ void setup()
     (*device).resetDevice(); Serial.println("OpenMFA Device Reset done.");   
     //printDeviceInfo();
      
-    //  Command tests
-    //char * google_seedDomain = (*device).getSeedDomain64_E_Pin("google.com", 123114L);
-    //char* one_time_pin = "Ls17A9aY0P058+Qq32vqwF+wrMA=";
-    //char *OTP_E_Pin = (*device).getOTP64_E_Pin("google.com", 23011540L, 23011540L);
-    
     //  Start loop
     Serial.println("OpenMFA Device Setup Complete.\n");
 }
@@ -35,9 +30,6 @@ int buffer_i = 0;
     
 void loop()
 {
-    Serial.println("loop\n");
-    delay(1000);
-  return;
   if (Serial.available()){//check if there's any data sent from the remote bluetooth shield
     recvChar = Serial.read();
     //Serial.print(recvChar); //  Do not print out, might be slow.
@@ -50,15 +42,16 @@ void loop()
       //  Process
       Serial.println(buffer);
       cJSON* cmd = cJSON_Parse(buffer);
-      
+      Serial.println("after parse");
       cJSON *response = cmdToOpenMFAMethod(cmd); 
+      Serial.println("After response");
       char *output = cJSON_Print(response);
       Serial.println(output);
       
       //  Free memory
       cJSON_Delete(cmd);
       cJSON_Delete(response);
-      free(output);
+      delete output;
       
       buffer_i = 0;
     } else
@@ -76,31 +69,31 @@ void printDeviceInfo(){
     Serial.print("Uuid: ");
     Serial.print(output);
     Serial.println();
-    free(output);
+    delete output;
     
     output = (*device).getName();
     Serial.print("Name: ");
     Serial.print(output);
     Serial.println();
-    free(output);
+    delete output;
     
     output = (*device).getSeed();
     Serial.print("Seed: ");
     Serial.print(output);
     Serial.println();
-    free(output);
+    delete output;
     
     output = (*device).getHashedPassword();
     Serial.print("Hashed Password: ");
     Serial.print(output);
     Serial.println();
-    free(output);
+    delete output;
     
     output = (*device).getHashedPin();
     Serial.print("Hashed Pin: ");
     Serial.print(output);
     Serial.println();
-    free(output);
+    delete output;
 }
 
 
@@ -130,8 +123,8 @@ cJSON* cmdToOpenMFAMethod(cJSON *cmd){
      else
        cJSON_AddFalseToObject(response, "success");
        
-     free(oldPassword);
-     free(newPassword);
+     delete oldPassword;
+     delete newPassword;
    
    //  setPin
    } else if (strcmp(method, "setPin") == 0){
@@ -142,8 +135,8 @@ cJSON* cmdToOpenMFAMethod(cJSON *cmd){
      else
        cJSON_AddFalseToObject(response, "success");
        
-     free(oldPassword);
-     free(newPin);
+     delete oldPassword;
+     delete newPin;
    
    //  setName
    } else if (strcmp(method, "setName") == 0){
@@ -154,8 +147,8 @@ cJSON* cmdToOpenMFAMethod(cJSON *cmd){
      else
        cJSON_AddFalseToObject(response, "success");
        
-     free(oldPassword);
-     free(newName);
+     delete oldPassword;
+     delete newName;
    
    //  getDomainSeed_E_Pin
    } else if (strcmp(method, "getDomainSeed_E_Pin") == 0){
@@ -166,21 +159,41 @@ cJSON* cmdToOpenMFAMethod(cJSON *cmd){
      cJSON_AddStringToObject(response, "uuid", (*device).getUuid());
      cJSON_AddStringToObject(response, "name", (*device).getName());
        
-     free(domain);
-     free(pinNonce);
+     delete domain;
+     delete pinNonce;
    
    //  getDomainOTP_E_Pin
    } else if (strcmp(method, "getDomainOTP_E_Pin") == 0){
      char *domain = cJSON_GetObjectItem(cmd, "domain")->valuestring;
      char *pinNonce = cJSON_GetObjectItem(cmd, "pinNonce")->valuestring;
-     long timestamp = cJSON_GetObjectItem(cmd, "timestamp")->valueint;
-     cJSON_AddStringToObject(response, "domainOTP_E_Pin", (*device).getDomainOTP_E_Pin(domain, pinNonce, timestamp));
-     cJSON_AddStringToObject(response, "domainOTPAnswer", (*device).getDomainOTP(domain, timestamp));
-     cJSON_AddStringToObject(response, "uuid", (*device).getUuid());
-     cJSON_AddStringToObject(response, "name", (*device).getName());
+     char* timeIn5min = cJSON_GetObjectItem(cmd, "timeIn5min")->valuestring;
+     Serial.println("ad");
+     char* domainOTP_E_Pin = (*device).getDomainOTP_E_Pin(domain, pinNonce, timeIn5min);
+     Serial.println("ad1.5");
+     delay(500);
+     cJSON_AddStringToObject(response, "domainOTP_E_Pin", domainOTP_E_Pin);
+     Serial.println("ad2");
+     delay(500);
+     char* domainOTPAnswer = (*device).getDomainOTP(domain, timeIn5min);
+     Serial.println("ad2.5");
+     delay(500);
+     cJSON_AddStringToObject(response, "domainOTPAnswer", domainOTPAnswer);
+     Serial.println("ad3");
+     delay(500);
+     char* uuid = (*device).getUuid();
+     cJSON_AddStringToObject(response, "uuid", uuid);
+     char* name = (*device).getName();
+     cJSON_AddStringToObject(response, "name", name);
+     Serial.println("ad4");
        
-     free(domain);
-     free(pinNonce);
+     delete domain;
+     delete pinNonce;
+     delete timeIn5min;
+     
+     delete domainOTP_E_Pin;
+     delete domainOTPAnswer;
+     delete uuid;
+     delete name;
    
    //  resetDevice
    } else if (strcmp(method, "resetDevice") == 0){
@@ -207,10 +220,10 @@ cJSON* cmdToOpenMFAMethod(cJSON *cmd){
      else
        cJSON_AddFalseToObject(response, "success");    
        
-     free(password);
-     free(newName);    
-     free(newPin);
-     free(newPassword);                 
+     delete password;
+     delete newName;    
+     delete newPin;
+     delete newPassword;                 
      
    //  getInfo
    } else if (strcmp(method, "getInfo") == 0){
@@ -219,13 +232,12 @@ cJSON* cmdToOpenMFAMethod(cJSON *cmd){
      cJSON_AddStringToObject(response, "seed", (*device).getSeed());
      cJSON_AddStringToObject(response, "hashedPassword", (*device).getHashedPassword());
      cJSON_AddStringToObject(response, "hashedPin", (*device).getHashedPin());
-   
    }
    
    cJSON_AddStringToObject(response, "queryType", cJSON_GetObjectItem(cmd, "queryType")->valuestring);
    cJSON_AddNumberToObject(response, "timestamp", cJSON_GetObjectItem(cmd, "timestamp")->valueint);
      
-   free(method);
+   delete method;
    return response;
 }
 

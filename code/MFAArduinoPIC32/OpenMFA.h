@@ -6,8 +6,8 @@ seed, hashed_password and hashed_pin are all results from HMAC_SHA1
 
 */
 
+#include "Sha1.h"
 #include "EEPROMAnything.h"
-//#include "Sha1.h"
 
 #ifndef OpenMFA_h
 #define OpenMFA_h
@@ -40,9 +40,9 @@ public:
     bool setName(char* inputPassword, char* inputNewName);
     
     char* getDomainSeed_E_Pin(char* domain, char* pinNonce);
-    char* getDomainOTP_E_Pin(char* domain, char* pinNonce, long timeInMS);
+    char* getDomainOTP_E_Pin(char* domain, char* pinNonce, char* timeIn5min);
     char* getDomainSeed(char* domain);
-    char* getDomainOTP(char* domain, long timeInMS);
+    char* getDomainOTP(char* domain, char* timeIn5min);
     
     void resetDevice();
 

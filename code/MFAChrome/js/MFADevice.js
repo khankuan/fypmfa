@@ -12,7 +12,7 @@ resetDevice: function (callback)
 info: function (callback)
 
 Sample queries:
-{"queryType":"getDomainOTP_E_Pin","domain":"mail.google.com","pinNonce":1392606560266,"timestamp":1392606560267} 
+{"queryType":"getDomainOTP_E_Pin","domain":"mail.google.com","pinNonce":"1392606560266","timestamp":1392606560267,"timeIn5min":"1234"}*
 {"queryType":"getInfo","timestamp":1392606608574}
 
 */
