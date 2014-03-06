@@ -316,9 +316,9 @@ char* OpenMFA::getOneTimePin(char* pinNonce){
 /*
  * Hash function
  */
-sha1nfo sha;
 char* OpenMFA::hash(char *s)
 {
+    sha1nfo sha;
     sha1_init(&sha);
     sha1_write(&sha, s, strlen(s));
     char *result = (char*) sha1_result(&sha);

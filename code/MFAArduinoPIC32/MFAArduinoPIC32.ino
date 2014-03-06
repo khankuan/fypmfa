@@ -10,6 +10,7 @@ void setup()
     //  For Chrome, use 115200. For Serial, use 9600.
     Serial.begin(9600);
     delay(2000);
+    
     //setBaudRate();
     
     Serial1.begin(115200);
@@ -26,20 +27,22 @@ void setup()
 
 void setBaudRate(){
     Serial1.begin(38400);
-    Serial1.print("AT");
-    while (Serial1.available())
-      Serial.print(Serial1.read());
+    delay(1000);
+    Serial1.print("AT\r\n");
+    delay(1000);
+    Serial1.print("AT\r\n");
     
-    Serial.print("Setting namee");
-    Serial1.print("AT+NAMEK-HC06"); // Set the name to JY-MCU-HC06
-    while (Serial1.available())
-      Serial.print(Serial1.read());
+    Serial.println("Setting name");
+    delay(1000);
+    Serial1.print("AT+NAMEK-HC06\r\n"); // Set the name to JY-MCU-HC06
       
-    Serial.print("Setting baud rate");
-    Serial1.print("AT+BAUD8");
-    delay(500);
+    Serial.println("Setting baud rate");
+    delay(1000);
+    Serial1.print("AT+BAUD8\r\n");
+    
+    delay(1000);
     while (Serial1.available())
-      Serial.print(Serial1.read());
+      Serial.print((char)Serial1.read());
     Serial.println("");
 }
 
@@ -52,6 +55,12 @@ JsonParser<16> parser;
     
 void loop()
 {
+  if (Serial1.available())
+    Serial.print((char)Serial1.read());
+  if (Serial.available())
+    Serial1.print((char)Serial.read());
+  return;
+  
   if (Serial1.available() || Serial.available()){
     if (Serial.available())
       recvChar = Serial.read();
