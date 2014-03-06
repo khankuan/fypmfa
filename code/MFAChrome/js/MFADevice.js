@@ -12,8 +12,9 @@ resetDevice: function (callback)
 info: function (callback)
 
 Sample queries:
-{"queryType":"getDomainOTP_E_Pin","domain":"mail.google.com","pinNonce":"1392606560266","timestamp":1392606560267,"timeIn5min":"1234"}*
-{"queryType":"getInfo","timestamp":1392606608574}
+{"queryType":"getDomainSeed_E_Pin","domain":"mail.google.com","pinNonce":"1392606560266","timestamp":"1392606560267"}*
+{"queryType":"getDomainOTP_E_Pin","domain":"mail.google.com","pinNonce":"1392606560266","timestamp":"1392606560267","timeIn5min":"1234"}*
+{"queryType":"getInfo","timestamp":"1392606608574"}*
 
 */
 
@@ -141,7 +142,7 @@ var MFADevice = function(device){
       return;
     busy = true;
     function doQuery(){
-      q.timestamp = new Date().getTime();
+      q.timestamp = new Date().getTime()+"";
       callbacks[q.queryType+"_"+q.timestamp] = responseCallback;
       connect(function(s){
         if (s && s.device.address != device.address)

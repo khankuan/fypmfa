@@ -1,6 +1,7 @@
 #include "OpenMFA.h"
 #include "Base64.h"
 #include <WProgram.h>
+#include "sha1.c"
 
 /*
  * OpenMFA constructor
@@ -18,8 +19,9 @@ char* OpenMFA::getUuid()
 {
     OpenMFA_data OpenMFA_data;
     EEPROM_readAnything(0, OpenMFA_data);
-    char *output = new char[32];
-    strcpy(output, OpenMFA_data.uuid);
+    char *output = new char[sizeof(OpenMFA_data.uuid)+1];
+    memcpy(output, OpenMFA_data.uuid, sizeof(OpenMFA_data.uuid));
+    output[sizeof(OpenMFA_data.uuid)] = '\0';
     return output;
 }
 
@@ -32,8 +34,9 @@ char* OpenMFA::getName()
 {
     OpenMFA_data OpenMFA_data;
     EEPROM_readAnything(0, OpenMFA_data);
-    char *output = new char[32];
-    strcpy(output, OpenMFA_data.name);
+    char *output = new char[sizeof(OpenMFA_data.name)+1];
+    memcpy(output, OpenMFA_data.name, sizeof(OpenMFA_data.name));
+    output[sizeof(OpenMFA_data.name)] = '\0';
     return output;
 }
 
@@ -155,21 +158,11 @@ char* OpenMFA::getDomainOTP_E_Pin(char* domain, char* pinNonce, char* timeIn5min
     
     //  obtain h(pin, pinNonce)
     char *oneTimePin = getOneTimePin(pinNonce);
-    Serial.println(oneTimePin);
-    Serial.println("q");
-    delay(500);
     
     //  Xor to encrypt
     char* result = xorBase64(domainOTP, oneTimePin);
-    Serial.println("qq");
-    delay(500);
     delete domainOTP;
-    Serial.println("qq1");
-    Serial.println(oneTimePin);
-    delay(500);
     delete oneTimePin;
-    Serial.println("qq2");
-    delay(500);
     return result;
 }
 
@@ -219,7 +212,6 @@ void OpenMFA::resetDevice()
     delete seed;
     
     //  Password and pin
-    
     char *hashedPassword = hash("default");
     memcpy(OpenMFA_data.hashedPassword, hashedPassword, 32);
     delete hashedPassword;
@@ -240,13 +232,9 @@ char* OpenMFA::getSeed(){
     OpenMFA_data OpenMFA_data;
     EEPROM_readAnything(0, OpenMFA_data);
     
-    char *result = (char*) malloc(strlen(OpenMFA_data.seed));
-Serial.println("nn");
-Serial.println(strlen(OpenMFA_data.seed));
-delay(500);
-    memcpy(result, OpenMFA_data.seed, strlen(OpenMFA_data.seed));
-Serial.println("nn2");
-delay(500);
+    char *result = new char[sizeof(OpenMFA_data.seed)+1];
+    memcpy(result, OpenMFA_data.seed, sizeof(OpenMFA_data.seed));
+    result[sizeof(OpenMFA_data.seed)] = '\0';
     return result;
 }
 
@@ -255,8 +243,9 @@ char* OpenMFA::getHashedPassword(){
     OpenMFA_data OpenMFA_data;
     EEPROM_readAnything(0, OpenMFA_data);
 
-    char *result = new char[strlen(OpenMFA_data.hashedPassword)];
-    memcpy(result, OpenMFA_data.hashedPassword, strlen(OpenMFA_data.hashedPassword));
+    char *result = new char[sizeof(OpenMFA_data.hashedPassword)+1];
+    memcpy(result, OpenMFA_data.hashedPassword, sizeof(OpenMFA_data.hashedPassword));
+    result[sizeof(OpenMFA_data.hashedPassword)] = '\0';
     return result;
 }
 
@@ -265,8 +254,9 @@ char* OpenMFA::getHashedPin(){
     OpenMFA_data OpenMFA_data;
     EEPROM_readAnything(0, OpenMFA_data);
 
-    char *result = new char[strlen(OpenMFA_data.hashedPin)];
-    memcpy(result, OpenMFA_data.hashedPin, strlen(OpenMFA_data.hashedPin));
+    char *result = new char[sizeof(OpenMFA_data.hashedPin)+1];
+    memcpy(result, OpenMFA_data.hashedPin, sizeof(OpenMFA_data.hashedPin));
+    result[sizeof(OpenMFA_data.hashedPin)] = '\0';
     return result;
 }
 
@@ -276,22 +266,13 @@ char* OpenMFA::getHashedPin(){
  * OpenMFA get the Seed_Domain of a domain name in base 64
  */
 char* OpenMFA::getDomainSeed(char* domain){
-    Serial.println("asdf-1");
-    delay(500);
     char* seed = getSeed();
-    Serial.println("asdf");
-    delay(500);
     
     char* domainSeed = concat(seed, domain);
-    Serial.println("asdf1");
-    delay(500);
     char* result = hash(domainSeed);
-    Serial.println("asdf2");
-    delay(500);
     delete domainSeed;
     delete seed;
-    Serial.println("asdf3");
-    delay(500);
+    
     return result;
 }
 
@@ -301,19 +282,13 @@ char* OpenMFA::getDomainSeed(char* domain){
  * OpenMFA get the OTP of a domain name in base 64
  */
 char* OpenMFA::getDomainOTP(char* domain, char* timeIn5min){
-  
-    Serial.println("asd");
-    delay(500);
     char* domainSeed = getDomainSeed(domain);
     
-    Serial.println("asd1");
-    delay(500);
     char* OTP = concat(domainSeed, timeIn5min);
     char* result = hash(OTP);
     
-    Serial.println("asd2");
-    delay(500);
     delete domainSeed;
+    delete OTP;
     return result;
 }
 
@@ -341,24 +316,22 @@ char* OpenMFA::getOneTimePin(char* pinNonce){
 /*
  * Hash function
  */
+sha1nfo sha;
 char* OpenMFA::hash(char *s)
 {
-    
-    //Sha1.initHmac((uint8_t*)SHA1_DEFAULT_KEY, SHA1_DEFAULT_KEY_LENGTH);
-    //Sha1.print(s);
-    //char *result = (char*) Sha1.resultHmac();
-    char *result = new char[20];
-    sha1_1((uint8_t(*)[20])result, s, strlen(s));
+    sha1_init(&sha);
+    sha1_write(&sha, s, strlen(s));
+    char *result = (char*) sha1_result(&sha);
     
     //  encode to base64
     int base64_length = base64_enc_len(SHA1_DEFAULT_KEY_LENGTH);
     char resultBase64[base64_length];
     base64_encode(resultBase64, result, SHA1_DEFAULT_KEY_LENGTH);
-    delete result;
     
-    //return resultBase64;
-    char *output = new char[base64_length];
+    char *output = new char[base64_length+1];
     memcpy(output, resultBase64, base64_length);
+    output[base64_length] = '\0';
+    
     return output;
 }
 
@@ -372,27 +345,32 @@ char* OpenMFA::xorBase64(char* msg, char* key)
     //  Convert to binary
     int base64_length_msg = strlen(msg);
     int binary_length_msg = base64_dec_len(msg, base64_length_msg);
-    char *decodedMsg = new char[binary_length_msg];
+    char *decodedMsg = new char[binary_length_msg+1];
     base64_decode(decodedMsg, msg, base64_length_msg);
+    decodedMsg[binary_length_msg] = '\0';
     
     int base64_length_key = strlen(key);
-    int binary_length_key = base64_dec_len(key, base64_length_msg);
-    char *decodedKey = new char[binary_length_key];
+    int binary_length_key = base64_dec_len(key, base64_length_key);
+    char *decodedKey = new char[binary_length_key+1];
     base64_decode(decodedKey, key, base64_length_key);
+    decodedKey[binary_length_key] = '\0';
     
     //  Actual XOR
-    char *decodedResult = new char[binary_length_msg];
+    char *decodedResult = new char[binary_length_msg+1];
     for (int i = 0 ; i < 20; i++)
       decodedResult[i] = decodedMsg[i] ^ decodedKey[i % binary_length_key];
+    decodedResult[binary_length_msg] = '\0';
       
     //  Encode result
     int base64_length = base64_enc_len(binary_length_msg);
-    char *output = new char[base64_length];
+    char *output = new char[base64_length+1];
     base64_encode(output, decodedResult, binary_length_msg);
+    output[base64_length] = '\0';
 
     delete decodedMsg;
     delete decodedKey;
-    //delete decodedResult;
+    delete decodedResult;
+    
     return output;
 }
 
@@ -417,5 +395,6 @@ char* OpenMFA::concat(char *s1, char *s2)
     //in real code you would check for errors in malloc here
     strcpy(result, s1);
     strcat(result, s2);
+    result[strlen(s1) + strlen(s2)] = '\0';
     return result;
 }
