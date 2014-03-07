@@ -90,7 +90,7 @@ chrome.runtime.onMessageExternal.addListener(function (message, sender, sendResp
 
 							device.destroy();
 
-							var delay = 2000;
+							var delay = 1000;
 							if (response == undefined)
 								delay = 4000;
 
@@ -107,7 +107,7 @@ chrome.runtime.onMessageExternal.addListener(function (message, sender, sendResp
 							
 							device.destroy();
 
-							var delay = 2000;
+							var delay = 1000;
 							if (response == undefined)
 								delay = 4000;
 

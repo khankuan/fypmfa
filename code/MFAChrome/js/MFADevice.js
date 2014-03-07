@@ -15,6 +15,7 @@ Sample queries:
 {"queryType":"getDomainSeed_E_Pin","domain":"mail.google.com","pinNonce":"1392606560266","timestamp":"1392606560267"}*
 {"queryType":"getDomainOTP_E_Pin","domain":"mail.google.com","pinNonce":"1392606560266","timestamp":"1392606560267","timeIn5min":"1234"}*
 {"queryType":"getInfo","timestamp":"1392606608574"}*
+{"queryType":"updateInfo","password":"default","newName":"MyArd","timestamp":"1394179066429"}*
 
 */
 
@@ -24,7 +25,7 @@ var MFADevice = function(device){
 
   var status = 'alive';
   this.log = true;
-  this.timeout = 5000;
+  this.timeout = 6000;
   var self = this;
 
   //  OpenMFA methods
@@ -79,7 +80,7 @@ var MFADevice = function(device){
     var q = {queryType: "getDomainOTP_E_Pin"};
     q.domain = domain;
     q.pinNonce = pinNonce;
-    q.timeIn5min = new Date().getTime()/1000/60/5;
+    q.timeIn5min = Math.floor(new Date().getTime()/1000/60/5)+"";
     query(q, callback);
   }
 
@@ -126,11 +127,11 @@ var MFADevice = function(device){
   var profile = {"uuid": "00001101-0000-1000-8000-00805F9B34FB"};
   var busy = false;
   var socket;
-  var delimiter = 10;
+  var delimiter = 13;
   var tries;
   var deviceConnectCallback;
   var busyTimer;
-  var triesLimit = 22;
+  var triesLimit = 25;
 
   //  Connection methods
   function isBusy(){
@@ -161,6 +162,7 @@ var MFADevice = function(device){
         socket = s;
         readSocket();
         tries = 0;
+        console.log(JSON.stringify(q));
         send(JSON.stringify(q));
       });
 
@@ -172,8 +174,12 @@ var MFADevice = function(device){
     doQuery();
 
     setTimeout(function(){
-      if (self.log && callbacks[q.queryType+"_"+q.timestamp] != undefined)
+      if (self.log && callbacks[q.queryType+"_"+q.timestamp] != undefined){
         console.log("Timeout", q);
+        try {
+          disconnect();
+        } catch (err){console.log(err)};
+      }
 
       if (callbacks[q.queryType+"_"+q.timestamp] != undefined)
         callbacks[q.queryType+"_"+q.timestamp]();
@@ -233,8 +239,8 @@ var MFADevice = function(device){
 
   function responseHandler(message){
     console.log("response", message);
-    if (message.indexOf("\n") >= 0)
-      message = message.substring(0, message.indexOf("\n"));
+    //if (message.indexOf("\n") >= 0)
+    //  message = message.substring(0, message.indexOf("\n"));
 
     disconnect(function(){
       var msg = JSON.parse(message);

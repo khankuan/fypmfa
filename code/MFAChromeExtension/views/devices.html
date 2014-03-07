@@ -36,7 +36,7 @@
   </p>
 
   <p>
-    <button class="btn btn-primary" id="OTPsButton" ng-click="getDomainOTP()" ng-disabled="tabProtocol != 'https'">Fetch Domain OTPs (Auth)</button>
+    <button class="btn btn-primary" id="OTPsButton" ng-click="getDomainOTP()" ng-disabled="tabProtocol != 'https' && tabDomain != 'localhost'">Fetch Domain OTPs (Auth)</button>
   </p>
 
   <div class="alert alert-success" id="OTPsNotice" style="display:none">
@@ -44,7 +44,7 @@
   </div>
 
   <p>
-    <button class="btn btn-warning" id="domainSeedsButton" ng-click="getDomainSeed()" ng-disabled="tabProtocol != 'https'">Fetch Domain Seeds (Setup)</button>
+    <button class="btn btn-warning" id="domainSeedsButton" ng-click="getDomainSeed()" ng-disabled="tabProtocol != 'https' && tabDomain != 'localhost'">Fetch Domain Seeds (Setup)</button>
   </p>
 
   <div class="alert alert-success" id="domainSeedsNotice" style="display:none">

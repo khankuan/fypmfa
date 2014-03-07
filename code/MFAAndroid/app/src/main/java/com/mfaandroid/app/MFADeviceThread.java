@@ -16,7 +16,7 @@ public class MFADeviceThread extends Thread implements CallBack {
     private final BluetoothSocket mmSocket;
     private final InputStream mmInStream;
     private final OutputStream mmOutStream;
-    private int delimiter = 10;
+    private int delimiter = 13;
     private int timeout = 5000;
     Thread deathThread;
     MFAService mfaService;

@@ -62,7 +62,7 @@ bool OpenMFA::setPassword(char* inputOldPassword, char* inputNewPassword)
         return false;
         
     //  Set new password
-    base64_encode(OpenMFA_data.hashedPassword, inputNewPasswordHashed, strlen(inputNewPasswordHashed));
+    memcpy(OpenMFA_data.hashedPassword, inputNewPasswordHashed, 32);
     
     //  Store
     EEPROM_writeAnything(0, OpenMFA_data);
@@ -92,8 +92,8 @@ bool OpenMFA::setPin(char* inputPassword, char* inputNewPin)
     if (memcmp(inputPasswordHashed, OpenMFA_data.hashedPassword, strlen(inputPasswordHashed)) != 0)
         return false;
         
-    //  Set new password
-    base64_encode(OpenMFA_data.hashedPin, inputNewPinHashed, strlen(inputNewPinHashed));
+    //  Set new pin
+    memcpy(OpenMFA_data.hashedPin, inputNewPinHashed, 32);
     
     //  Store
     EEPROM_writeAnything(0, OpenMFA_data);
@@ -124,6 +124,7 @@ bool OpenMFA::setName(char* inputPassword, char* inputNewName)
         
     //  Store
     strcpy(OpenMFA_data.name, inputNewName);  //  pin same as password for default
+    EEPROM_writeAnything(0, OpenMFA_data);
     delete inputPasswordHashed;
     return true;
 }
@@ -370,7 +371,9 @@ char* OpenMFA::xorBase64(char* msg, char* key)
     delete decodedMsg;
     delete decodedKey;
     delete decodedResult;
-    
+    Serial.println(msg);
+    Serial.println(key);
+    Serial.println(output);
     return output;
 }
 

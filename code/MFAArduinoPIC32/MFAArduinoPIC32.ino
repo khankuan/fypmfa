@@ -8,7 +8,7 @@ OpenMFA *device;
 void setup()
 {
     //  For Chrome, use 115200. For Serial, use 9600.
-    Serial.begin(9600);
+    Serial.begin(115200);
     delay(2000);
     
     //setBaudRate();
@@ -28,17 +28,17 @@ void setup()
 void setBaudRate(){
     Serial1.begin(38400);
     delay(1000);
-    Serial1.print("AT\r\n");
+    Serial1.write("AT\r\n");
     delay(1000);
-    Serial1.print("AT\r\n");
+    Serial1.write("AT\r\n");
     
     Serial.println("Setting name");
     delay(1000);
-    Serial1.print("AT+NAMEK-HC06\r\n"); // Set the name to JY-MCU-HC06
+    Serial1.write("AT+NAMEK-HC06\r\n"); // Set the name to JY-MCU-HC06
       
     Serial.println("Setting baud rate");
     delay(1000);
-    Serial1.print("AT+BAUD8\r\n");
+    Serial1.write("AT+BAUD8\r\n");
     
     delay(1000);
     while (Serial1.available())
@@ -51,16 +51,18 @@ void setBaudRate(){
 char recvChar;
 char buffer[256];
 int buffer_i = 0;
+char delimiter = (char)13;
 JsonParser<16> parser;
     
 void loop()
 {
+  /*
   if (Serial1.available())
-    Serial.print((char)Serial1.read());
+    Serial.println((char)Serial1.read());
   if (Serial.available())
-    Serial1.print((char)Serial.read());
+    Serial1.write((char)Serial.read());
   return;
-  
+  */
   if (Serial1.available() || Serial.available()){
     if (Serial.available())
       recvChar = Serial.read();
@@ -70,7 +72,7 @@ void loop()
     buffer[buffer_i] = recvChar;
     if (buffer_i > 254)
       buffer_i = 0;
-    if (recvChar == '*'){
+    if (recvChar == delimiter){
       buffer[buffer_i] = '\0';
       
       //  Process
@@ -80,13 +82,15 @@ void loop()
       cmdToOpenMFAMethod(cmd, response); 
       char *output = cJSON_Print(response);
       Serial.println(output);
-      Serial1.println(output);
+      Serial1.print(output);
+      Serial1.print(delimiter);
+      Serial1.flush();
       
       //  Free memory
       //cJSON_Delete(cmd);
       cJSON_Delete(response);
       free(output);
-      
+      Serial.println(availableMemory());
       buffer_i = 0;
     } else
       buffer_i++;
@@ -252,11 +256,11 @@ cJSON* cmdToOpenMFAMethod(JsonHashTable cmd, cJSON *response){
      char *newPassword = cmd.getString("newPassword");
    
      boolean valid = true;
-     if (newName != NULL)
+     if (newName != NULL && strlen(newName) > 0)
        valid = valid && ((*device).setName(password, newName));
-     if (newPin != NULL)
+     if (newPin != NULL && strlen(newPin) > 0)
        valid = valid && ((*device).setPin(password, newPin));
-     if (newPassword != NULL)
+     if (newPassword != NULL && strlen(newPassword) > 0)
        valid = valid && ((*device).setPassword(password, newPassword));
      
      if (valid)
