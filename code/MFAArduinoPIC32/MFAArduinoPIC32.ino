@@ -72,7 +72,7 @@ void loop()
     buffer[buffer_i] = recvChar;
     if (buffer_i > 254)
       buffer_i = 0;
-    if (recvChar == delimiter){
+    if (recvChar == delimiter || recvChar == '*'){
       buffer[buffer_i] = '\0';
       
       //  Process

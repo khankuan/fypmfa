@@ -96,6 +96,7 @@ module.exports = function(app) {
 
 					for (var i in domainOTPs){
 						var domainOTP = domainOTPs[i];
+						
 						console.log(otps[domainOTP.uuid], domainOTP.domainOTP);
 						if (otps[domainOTP.uuid] && otps[domainOTP.uuid] == domainOTP.domainOTP)
 							match++;

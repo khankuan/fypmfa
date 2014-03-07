@@ -371,9 +371,6 @@ char* OpenMFA::xorBase64(char* msg, char* key)
     delete decodedMsg;
     delete decodedKey;
     delete decodedResult;
-    Serial.println(msg);
-    Serial.println(key);
-    Serial.println(output);
     return output;
 }
 

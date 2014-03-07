@@ -68,7 +68,7 @@ var MFADevice = function(device){
   }
 
   this.getDomainSeed = function(domain, pin, callback){
-    var pinNonce = new Date().getTime();
+    var pinNonce = new Date().getTime()+"";
     this.getDomainSeed_E_Pin(domain, pinNonce, function(response){
       if (response != undefined && response.domainSeed_E_Pin != undefined)
         response.domainSeed = xorBase64(response.domainSeed_E_Pin, hash(hash(pin) + pinNonce));
@@ -85,7 +85,7 @@ var MFADevice = function(device){
   }
 
   this.getDomainOTP = function(domain, pin, callback){
-    var pinNonce = new Date().getTime();
+    var pinNonce = new Date().getTime()+"";
     this.getDomainOTP_E_Pin(domain, pinNonce, function(response){
       if (response != undefined && response.domainOTP_E_Pin != undefined)
         response.domainOTP = xorBase64(response.domainOTP_E_Pin, hash(hash(pin) + pinNonce));
