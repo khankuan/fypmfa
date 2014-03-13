@@ -21,13 +21,11 @@ app.controller('DevicesController', ['$scope', '$location', 'devicesService', fu
 		    $scope.safeApply();
 		});
 
-		chrome.bluetooth.getDevices({
-		    deviceCallback: function(device) {
-		      	console.log(device);
-		    	$scope.devices[device.address] = device;
-		        $scope.safeApply();
-		    }
-		}, function() {
+		chrome.bluetooth.getDevices(function(devices) {
+			console.log(devices);
+	      	for (var i in devices)
+	    		$scope.devices[devices[i].address] = devices[i];
+	        $scope.safeApply();
 		});
 	}
 	$scope.init();

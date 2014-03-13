@@ -33,11 +33,9 @@ chrome.runtime.onMessageExternal.addListener(function (message, sender, sendResp
 	if (message.type == "GetDomainSeed" || message.type == "GetDomainOTP"){
 
 		var devices = {};
-		chrome.bluetooth.getDevices({
-		    deviceCallback: function(device) {
-		    	devices[device.address] = device;
-		    }
-		}, function() {
+		chrome.bluetooth.getDevices(function(d) {
+			for (var i in d)
+		    	devices[d[i].address] = d[i];
 		});
 
 		setTimeout(function(){
@@ -66,7 +64,7 @@ chrome.runtime.onMessageExternal.addListener(function (message, sender, sendResp
 						chrome.runtime.sendMessage(sender.id, m);
 					}
 				}
-
+				
 				function callAPI(i){
 					if (i >= devicesKey.length)
 						return;
