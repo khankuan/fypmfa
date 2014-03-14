@@ -3,7 +3,7 @@ var ObjectId = mongoose.Schema.Types.ObjectId;
 
 var mfaDeviceSchema = new mongoose.Schema({
 	userId: ObjectId,
-	uuid: { type: String, unique: true },
+	uuid: String,
 	name: String,
 	domainSeed: String,
 	dateCreated: { type: Date, default: Date.now }
