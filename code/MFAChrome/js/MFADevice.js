@@ -124,7 +124,7 @@ var MFADevice = function(device){
 
   //  Variables
   var callbacks = {};
-  var profile = {"uuid": "00001101-0000-1000-8000-00805F9B34FB"};
+  var profile = {uuid: "00001101-0000-1000-8000-00805F9B34FB"};
   var busy = false;
   var socket;
   var delimiter = 13;
@@ -197,6 +197,9 @@ var MFADevice = function(device){
   function connect(callback){
     chrome.bluetooth.addProfile(profile, function(){
       deviceConnectCallback = callback;
+      if (chrome.runtime.lastError)
+          if (self.log)
+              console.log("Add Profile fail", device, profile, chrome.runtime.lastError.message);
       chrome.bluetooth.connect({device: device, profile: profile}, function(){
           if (chrome.runtime.lastError) {
             if (self.log)
