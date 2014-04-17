@@ -160,10 +160,14 @@ var MFADevice = function(device){
           console.log("Connected at socket", s);
 
         socket = s;
-        readSocket();
+        //readSocket();
         tries = 0;
         console.log(JSON.stringify(q));
-        send(JSON.stringify(q));
+        chrome.bluetooth.setSocketPaused(socket.id, true, function() { 
+          chrome.bluetooth.setSocketPaused(socket.id, false, function(){
+            send(JSON.stringify(q));
+          }); 
+        });
       });
 
       clearTimeout(busyTimer);
@@ -213,7 +217,7 @@ var MFADevice = function(device){
   }
 
   function disconnect(disconnectCallback){
-    chrome.bluetooth.disconnect({socket:socket}, function(){
+    chrome.bluetooth.disconnect({socketId: socket.id}, function(){
       if (self.log)
         console.log("Disconnected", device);
       if (disconnectCallback != undefined)
@@ -222,7 +226,10 @@ var MFADevice = function(device){
   }
 
 
+
+
   var msg = "";
+  /*
   function readSocket(){
     setTimeout(function(){
       chrome.bluetooth.read({socket:socket}, function(arraybuffer){
@@ -239,6 +246,22 @@ var MFADevice = function(device){
       });
     }, 200);
   }
+  */
+  function receiveCallback(info){
+      console.log("received", info)
+      var data = ab2str(info.data);
+      msg += data;
+      for (var i = 0; i < data.length; i++){
+        if (data.charCodeAt(i) == delimiter){
+          responseHandler(msg.substring(0, msg.length - 1));
+          msg = "";
+          return;
+        }
+      }
+  };
+
+  chrome.bluetooth.onReceive.addListener(receiveCallback);
+  //chrome.bluetooth.onReceiveError.addListener(receiveCallback);
 
   function responseHandler(message){
     console.log("response", message);
@@ -255,8 +278,8 @@ var MFADevice = function(device){
     });
   }
 
-  function send(msg){console.log(msg);
-    chrome.bluetooth.write({socket:socket, data: str2ab(msg)}, function(bytes) {
+  function send(msg){
+    chrome.bluetooth.send(socket.id, str2ab(msg), function(bytes) {
       if (chrome.runtime.lastError) {
         setTimeout(function(){
           if (tries < triesLimit){
